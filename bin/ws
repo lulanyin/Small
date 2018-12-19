@@ -1,0 +1,4 @@
+#!/usr/bin/env php
+<?php
+require_once "./bootstrap.php";
+App::init(1)->start();

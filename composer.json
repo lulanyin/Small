@@ -1,0 +1,36 @@
+{
+  "require": {
+    "lulanyin/db": "dev-master",
+    "lulanyin/smarty": "dev-master",
+    "easyswoole/verifycode": "^2.0",
+    "intervention/image": "^2.4",
+    "codeitnowin/barcode": "^3.0",
+    "doctrine/annotations": "1.4",
+    "ext-json": "^1.5",
+    "ext-curl": "^7.2",
+    "php": "^7.1",
+    "ext-pcntl": "^7.2",
+    "ext-mbstring": "^7.2",
+    "ext-iconv": "^7.2",
+    "ext-exif": "^7.2"
+  },
+  "require-dev": {
+    "swoft/swoole-ide-helper": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "Small\\" : "src/",
+      "app\\" : "app/"
+    },
+    "files": [
+      "src/helpers/functions.php",
+      "src/helpers/shortcut.php"
+    ]
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.laravel-china.org"
+    }
+  }
+}
