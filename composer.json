@@ -5,6 +5,14 @@
     "small",
     "php framework"
   ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "lulanyin",
+      "email": "me@lanyin.lu"
+    }
+  ],
   "require": {
     "lulanyin/db": "dev-master",
     "lulanyin/smarty": "dev-master",
