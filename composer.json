@@ -1,4 +1,10 @@
 {
+  "name": "lulanyin/Small",
+  "description": "PHP网站服务开发框架",
+  "keywords": [
+    "small",
+    "php framework"
+  ],
   "require": {
     "lulanyin/db": "dev-master",
     "lulanyin/smarty": "dev-master",
