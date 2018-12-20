@@ -1,6 +1,8 @@
 <?php
 namespace Small\websocket\mysql;
 
+use Small\Config;
+use Small\lib\util\File;
 use Swoole\Coroutine\MySQL;
 
 class DB {

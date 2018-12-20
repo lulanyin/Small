@@ -1,7 +1,6 @@
 <?php
 namespace Small\websocket\mysql;
 
-use app\commend\server\src\Server;
 use Swoole\Coroutine\MySQL;
 
 /**
@@ -1330,7 +1329,7 @@ class Query {
      */
     public function releaseMysql($type = Pool::READ){
         if(!$this->transaction && !is_null($this->mysql)){
-            Server::putPool($this->mysql, $type);
+            Pool::putPool($this->mysql, $type);
             $this->mysql = null;
         }
     }

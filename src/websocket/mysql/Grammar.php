@@ -1,9 +1,8 @@
 <?php
 namespace Small\websocket\mysql;
 
-use app\commend\server\src\Server;
-use app\Config;
-use app\lib\util\Arr;
+use Small\Config;
+use Small\lib\util\Arr;
 use Swoole\Coroutine\MySQL;
 
 /**
@@ -230,7 +229,7 @@ class Grammar{
      * @return null| MySQL
      */
     public function getConnection($type="read"){
-        $this->query->mysql =  !is_null($this->query->mysql) ? $this->query->mysql : Server::getPool($type=="read" ? Pool::READ : Pool::WRITE);
+        $this->query->mysql =  !is_null($this->query->mysql) ? $this->query->mysql : Pool::getPool($type=="read" ? Pool::READ : Pool::WRITE);
         return $this->query->mysql;
     }
 
@@ -729,7 +728,7 @@ class Grammar{
     public function release($type=Pool::READ){
         //必须不在事务中
         if(!$this->query->transaction && !is_null($this->query->mysql)){
-            Server::putPool($this->query->mysql, $type);
+            Pool::putPool($this->query->mysql, $type);
             $this->query->mysql = null;
         }
     }
