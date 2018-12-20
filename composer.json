@@ -21,12 +21,12 @@
     "codeitnowin/barcode": "^3.0",
     "doctrine/annotations": "1.4",
     "ext-json": "^1.5",
-    "ext-curl": "^7.2",
+    "ext-curl": "^7.1",
     "php": "^7.1",
-    "ext-pcntl": "^7.2",
-    "ext-mbstring": "^7.2",
-    "ext-iconv": "^7.2",
-    "ext-exif": "^7.2"
+    "ext-pcntl": "^7.1",
+    "ext-mbstring": "^7.1",
+    "ext-iconv": "^7.1",
+    "ext-exif": "^7.1"
   },
   "require-dev": {
     "swoft/swoole-ide-helper": "dev-master"
