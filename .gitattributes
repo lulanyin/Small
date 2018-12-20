@@ -1,0 +1,8 @@
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/app export-ignore
+/bin export-ignore
+/config export-ignore
+/public export-ignore
+/resources export-ignore
+/runtime export-ignore
