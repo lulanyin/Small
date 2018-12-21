@@ -49,6 +49,8 @@ return [
         "task"          => "task",
         "finish"        => "finish",
     ],
+    //命令执行的根目录
+    "commend" => "app\cmd\\",
     //数据库配置
     "mysql" => [
         "default"   => [
