@@ -1,7 +1,7 @@
 <?php
 namespace Small\lib\util;
 
-use app\Config;
+use Small\Config;
 
 class Log {
     public static function log($content, $file_name='log'){
