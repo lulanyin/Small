@@ -1,6 +1,7 @@
 <?php
-namespace Small\websocket;
+namespace Small\server;
 
+use Small\server\http\RequestController;
 use Small\Config;
 use Small\IServer;
 use Small\lib\cache\Cache;
@@ -8,7 +9,7 @@ use Small\lib\cache\Cache;
 /**
  *
  * Class Server
- * @package Small\websocket
+ * @package Small\server
  */
 class Server implements IServer {
 
@@ -35,18 +36,27 @@ class Server implements IServer {
      */
     public function __construct()
     {
-        $set = Config::get("server.websocket");
+        $set = Config::get("server.server");
         $this->host = $set['host'] ?? $this->host;
         $this->port = $set['port'] ?? $this->port;
         $this->ws = new \swoole_websocket_server($this->host, $this->port);
         //配置
         $this->ws->set($set['setting']);
 
+        //任务启动时
+        $this->ws->on("WorkerStart", [$this, "workerStart"]);
+
+        //任务启动时
+        $this->ws->on("workerExit", [$this, "workerExit"]);
+
         //新客户端连接
         $this->ws->on("open", [$this, "open"]);
 
         //客户端发来消息
         $this->ws->on("message", [$this, "message"]);
+
+        //HTTP请求
+        $this->ws->on("request", [$this, "request"]);
 
         //客户端关闭
         $this->ws->on("close", [$this, "close"]);
@@ -59,6 +69,25 @@ class Server implements IServer {
 
     }
 
+    /**
+     * 服务启动，此事件在Worker进程/Task进程启动时发生。这里创建的对象可以在进程生命周期内使用
+     * @param \swoole_websocket_server $server
+     * @param int $worker_id
+     */
+    public function workerStart(\swoole_websocket_server $server, int $worker_id){
+        $set = server("server");
+        if(isset($set['start'])){
+            $ctrl = $set['home'].$set['start']."Controller";
+            if(!class_exists($ctrl)){
+                return;
+            }
+            $ctrl = new $ctrl($server);
+            if($ctrl instanceof ServerController){
+                $ctrl->index($worker_id);
+            }
+        }
+    }
+
 
 
     /**
@@ -68,25 +97,19 @@ class Server implements IServer {
      */
     public function open(\swoole_websocket_server $server, \swoole_http_request $request){
         //连接，使用路由处理
-        go(function () use ($server, $request){
-            try{
-                $set = server("websocket");
-                if(isset($set['open'])){
-                    $ctrl = $set['home'].$set['open']."Controller";
-                    if(!class_exists($ctrl)){
-                        return;
-                    }
-                    $ctrl = new $ctrl($server);
-                    if($ctrl instanceof WebSocketController){
-                        $ctrl->request = $request;
-                        $ctrl->fd = $request->fd;
-                        $ctrl->index();
-                    }
-                }
-            }catch (\swoole_exception $exception){
+        $set = server("server");
+        if(isset($set['open'])){
+            $ctrl = $set['home'].$set['open']."Controller";
+            if(!class_exists($ctrl)){
                 return;
             }
-        });
+            $ctrl = new $ctrl($server);
+            if($ctrl instanceof ServerController){
+                $ctrl->request = $request;
+                $ctrl->fd = $request->fd;
+                $ctrl->index();
+            }
+        }
     }
 
     /**
@@ -96,27 +119,40 @@ class Server implements IServer {
      */
     public function message(\swoole_websocket_server $server, \swoole_websocket_frame $frame){
         //做一个路由
-        go(function () use ($server, $frame){
-            try{
-                $set = server("websocket");
-                if(isset($set['open'])){
-                    $ctrl = $set['home'].$set['message']."Controller";
-                    if(!class_exists($ctrl)){
-                        return;
-                    }
-                    $ctrl = new $ctrl($server);
-                    if($ctrl instanceof WebSocketController){
-                        $ctrl->frame = $frame;
-                        $ctrl->fd = $frame->fd;
-                        $ctrl->getCacheUser();
-                        $ctrl->index();
-                    }
-                }
-            }catch (\swoole_exception $exception){
-                //
+        $set = server("server");
+        if(isset($set['message'])){
+            $ctrl = $set['home'].$set['message']."Controller";
+            if(!class_exists($ctrl)){
                 return;
             }
-        });
+            $ctrl = new $ctrl($server);
+            if($ctrl instanceof ServerController){
+                $ctrl->frame = $frame;
+                $ctrl->fd = $frame->fd;
+                $ctrl->getCacheUser();
+                $ctrl->index();
+            }
+        }
+    }
+
+    /**
+     * 客户端HTTP请求
+     * @param \swoole_http_request $request
+     * @param \swoole_http_response $response
+     */
+    public function request(\swoole_http_request $request, \swoole_http_response $response){
+        //做一个路由
+        $set = server("server");
+        if(isset($set['request'])){
+            $ctrl = $set['home'].$set['request']."Controller";
+            if(!class_exists($ctrl)){
+                return;
+            }
+            $ctrl = new $ctrl();
+            if($ctrl instanceof RequestController){
+                $ctrl->index($request, $response);
+            }
+        }
     }
 
     /**
@@ -125,26 +161,19 @@ class Server implements IServer {
      * @param int $fd
      */
     public function close(\swoole_websocket_server $server, int $fd){
-        go(function () use ($server, $fd){
-            try{
-                $set = server("websocket");
-                if(isset($set['open'])){
-                    $ctrl = $set['home'].$set['message']."Controller";
-                    if(!class_exists($ctrl)){
-                        return;
-                    }
-                    $ctrl = new $ctrl($server);
-                    if($ctrl instanceof WebSocketController){
-                        $ctrl->fd = $fd;
-                        $ctrl->getCacheUser();
-                        $ctrl->index();
-                    }
-                }
-            }catch (\swoole_exception $exception){
-                //
+        $set = server("server");
+        if(isset($set['close'])){
+            $ctrl = $set['home'].$set['close']."Controller";
+            if(!class_exists($ctrl)){
                 return;
             }
-        });
+            $ctrl = new $ctrl($server);
+            if($ctrl instanceof ServerController){
+                $ctrl->fd = $fd;
+                $ctrl->getCacheUser();
+                $ctrl->index();
+            }
+        }
     }
 
     /**
@@ -156,14 +185,14 @@ class Server implements IServer {
      */
     public function task(\swoole_websocket_server $server, $task_id, $reactor_id, $data){
         //echo $task_id . " : Task 开始" . PHP_EOL;
-        $set = server("websocket");
-        if(isset($set['open'])){
+        $set = server("server");
+        if(isset($set['task'])){
             $ctrl = $set['home'].$set['task']."Controller";
             if(!class_exists($ctrl)){
                 return;
             }
             $ctrl = new $ctrl($server);
-            if($ctrl instanceof WebSocketController){
+            if($ctrl instanceof ServerController){
                 $ctrl->task_id = $task_id;
                 $ctrl->reactor_id = $reactor_id;
                 $ctrl->data = $data;
@@ -181,14 +210,14 @@ class Server implements IServer {
      */
     public function finish(\swoole_websocket_server $server, $task_id, $data){
         //echo $task_id . " : Task 结束" . PHP_EOL;
-        $set = server("websocket");
-        if(isset($set['open'])){
+        $set = server("server");
+        if(isset($set['finish'])){
             $ctrl = $set['home'].$set['finish']."Controller";
             if(!class_exists($ctrl)){
                 return;
             }
             $ctrl = new $ctrl($server);
-            if($ctrl instanceof WebSocketController){
+            if($ctrl instanceof ServerController){
                 $ctrl->task_id = $task_id;
                 $ctrl->data = $data;
                 $ctrl->getCacheUser();

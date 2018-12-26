@@ -1,14 +1,12 @@
 <?php
-namespace app\commend\server\src\controller;
-
-use app\commend\server\src\WebSocketController;
+namespace Small\server\controller;
 
 /**
  * 接收心跳消息
  * Class heartbeatController
- * @package app\commend\server\src\controller
+ * @package Small\server\controller
  */
-class heartbeatController extends WebSocketController{
+class HeartbeatController extends ServerController{
 
     /**
      * 接收心跳消息

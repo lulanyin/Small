@@ -7,7 +7,7 @@
  */
 namespace Small\lib\util{
 
-    use app\Config;
+    use Small\Config;
 
     class Request{
 

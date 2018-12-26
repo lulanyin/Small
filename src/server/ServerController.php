@@ -1,11 +1,11 @@
 <?php
-namespace Small\websocket;
+namespace Small\server;
 
-
+use Small\lib\util\Arr;
 use Small\lib\cache\Cache;
 use Small\model\models\UserModel;
 
-abstract class WebSocketController{
+abstract class ServerController{
 
     /**
      * server worker

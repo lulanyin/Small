@@ -1,12 +1,12 @@
 <?php
-namespace Small\websocket;
+namespace Small\server\controller;
 
 /**
  * 客户端断开连接
- * Class closeController
- * @package app\commend\server\src
+ * Class CloseController
+ * @package Small\server\controller
  */
-class closeController extends WebSocketController {
+class CloseController extends ServerController {
 
     /**
      * 客户端断开连接

@@ -25,8 +25,8 @@ return [
             ]
         ]
     ],
-    //WebSocket配置，若启动ws服务，需要
-    "websocket" => [
+    //server配置，若启动ws服务，需要
+    "server" => [
         "host"      => "0.0.0.0",
         "port"      => 9600,
         "setting"  => [
@@ -35,7 +35,7 @@ return [
             'max_connection'        => 256,
             'daemonize'             => 0,
             'dispatch_mode'         => 2,
-            'log_file'              => RUNTIME.'/logs/ws.log',
+            'log_file'              => RUNTIME.'/logs/websocket.log',
             'task_worker_num'       => 4,
             'package_max_length'    => 8092
         ],

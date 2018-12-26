@@ -1,12 +1,12 @@
 <?php
-namespace Small\websocket;
+namespace Small\server\controller;
 
 /**
  * 处理消息
- * Class messageController
- * @package app\commend\server\src
+ * Class MessageController
+ * @package Small\server\controller
  */
-class messageController extends WebSocketController {
+class MessageController extends ServerController {
 
     /**
      * 消息进入，处理路由
@@ -45,7 +45,7 @@ class messageController extends WebSocketController {
             $eventArray = explode(".", $event);
             $eventArray = count($eventArray)<2 ? array_pad($eventArray, 2, "index") : $eventArray;
             //
-            $prefix = server("websocket.home");
+            $prefix = server("server.home");
             $class = $prefix.join("\\", array_slice($eventArray, 0, -1))."Controller";
             if(!class_exists($class)){
                 $class = $prefix.join("\\", $eventArray)."Controller";
@@ -80,7 +80,7 @@ class messageController extends WebSocketController {
                             }
                             if(in_array($method, $enableMethodList)){
                                 //可以使用
-                                if($controller instanceof WebSocketController){
+                                if($controller instanceof ServerController){
                                     $controller->ws = $this->ws;
                                     $controller->data = $this->data;
                                     $controller->frame = $this->frame;

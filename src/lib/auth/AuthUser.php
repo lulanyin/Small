@@ -12,6 +12,12 @@ use Small\model\models\UserModel;
 class AuthUser{
 
     /**
+     * 是否启用连接池
+     * @var bool
+     */
+    public $pool = false;
+
+    /**
      * 账号的资料
      * @var array
      */
@@ -125,7 +131,7 @@ class AuthUser{
         //得到完整会员数据
         $tempInfo = $this->getInfo(["u.{$field}", $account]);
         if(!empty($tempInfo)){
-            $hm = new LoginHistoryModel();
+            $hm = new LoginHistoryModel($this->pool);
             //1小时内，如果超过错误次数，则直接禁止登录
             if($hm->getErrorHistory($tempInfo['uid'], 3600) < 5){
                 //验证密码
@@ -180,13 +186,13 @@ class AuthUser{
             $this->setError(202);
         }else{
             //检测账号是否已被注册
-            $um = new UserModel();
+            $um = new UserModel($this->pool);
             $rows = $um->mainQuery("u")
                 ->where("u.{$field}", $account)->rows();
             $rows = !empty($rows) ? $rows : 0;
             if($rows==0){
                 //查会员组
-                $gm = new UserGroupModel();
+                $gm = new UserGroupModel($this->pool);
                 $group = $gm->mainQuery()
                     ->where("group_type", $groupType)
                     ->first();
@@ -248,7 +254,7 @@ class AuthUser{
      */
     private function updateLogin(array $userInfo, $token = null){
         //登录用的数据库
-        $hm = new LoginHistoryModel();
+        $hm = new LoginHistoryModel($this->pool);
         //标记，已登录
         $this->isLogin = true;
         //当前时间
@@ -287,7 +293,7 @@ class AuthUser{
      * @return array|null
      */
     private function getInfo($where){
-        $m = new UserModel();
+        $m = new UserModel($this->pool);
         $full_data = $m->where($where)->first();
         return !empty($full_data) ? $full_data : null;
     }
@@ -348,7 +354,7 @@ class AuthUser{
             Request::dropCookie("token");
             Request::dropSession("token");
             //清除登录
-            $hm = new LoginHistoryModel();
+            $hm = new LoginHistoryModel($this->pool);
             $hm->mainQuery()
                 ->whereDateTimeStartAt("exp_time", time())
                 ->where("token", $token)
@@ -366,7 +372,7 @@ class AuthUser{
         $str = Str::randomWord(2);
         $str .= Str::randomNumber(8);
         $userName = $str.$suffix;
-        $u = new UserModel();
+        $u = new UserModel($this->pool);
         $rows = $u->mainQuery()->whereRaw("`username` = '{$userName}'")->rows();
         if($rows>0){
             return $this->getUserName($suffix);
@@ -387,7 +393,7 @@ class AuthUser{
         }
         $safe_code = Str::randomString(6);
         $md5Password = $this->md5Pwd ? md5($newPassword.$safe_code) : md5(md5($newPassword).$safe_code);
-        $um = new UserModel();
+        $um = new UserModel($this->pool);
         $db = $um->mainQuery()
             ->where('uid', $uid)
             ->set([

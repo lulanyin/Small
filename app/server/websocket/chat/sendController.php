@@ -1,9 +1,9 @@
 <?php
-namespace app\websocket\chat;
+namespace app\server\websocket\chat;
 
-use Small\websocket\WebSocketController;
+use Small\server\controller\ServerController;
 
-class sendController extends WebSocketController{
+class sendController extends ServerController {
 
     public function index(...$args)
     {

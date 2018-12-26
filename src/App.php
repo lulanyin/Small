@@ -4,7 +4,7 @@ namespace Small;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Small\commend\ICommend;
 use Small\http\Router;
-use Small\websocket\Server;
+use Small\server\Server;
 
 /**
  * APP统一入口
@@ -15,21 +15,18 @@ class App {
 
     /**
      * 初始化运行
-     * @param bool $ws 是不是运行websocket服务
+     * @param bool $server 是不是运行 Swoole Server 服务
      * @return IServer
      */
-    public static function init(bool $ws = false){
+    public static function init(bool $server = false){
         self::before();
-        //注解实现
-        AnnotationRegistry::registerLoader(function ($class){
-            return class_exists($class) || interface_exists($class);
-        });
-        if($ws){
-            //运行 websocket 服务，由 Swoole 拓展支持
-            echo "+-----------------------+\r\n";
-            echo "| ♪♪♪♪♪♪♪ SMALL ♪♪♪♪♪♪♪ |\r\n";
-            echo "| welcome use websocket |\r\n";
-            echo "+-----------------------+\r\n";
+        if($server){
+            //运行 server 服务，由 Swoole 拓展支持
+            echo "+---------------------+\r\n";
+            echo "| ♪♪♪♪♪♪ SMALL ♪♪♪♪♪♪ |\r\n";
+            echo "|  welcome use server |\r\n";
+            echo "|  support by swoole  |\r\n";
+            echo "+---------------------+\r\n";
             return new Server();
         }else{
             //HTTP，设置前缀、声明使用的路由参数
@@ -91,6 +88,10 @@ class App {
         if(!$domain){
             exit("未检测到站点域名配置".PHP_EOL);
         }
+        //注解实现
+        AnnotationRegistry::registerLoader(function ($class){
+            return class_exists($class) || interface_exists($class);
+        });
     }
 
     /**

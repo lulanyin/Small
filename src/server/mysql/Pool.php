@@ -1,5 +1,5 @@
 <?php
-namespace Small\websocket\mysql;
+namespace Small\server\mysql;
 
 use Small\Config;
 use Small\lib\util\Arr;
