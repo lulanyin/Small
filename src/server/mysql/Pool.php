@@ -108,7 +108,7 @@ class Pool {
      */
     public static function getPool($type = Pool::READ){
         if(null == self::$MysqlPool){
-            self::$MysqlPool = new Pool(10);
+            self::init();
         }
         return self::$MysqlPool->get($type);
     }
@@ -121,6 +121,17 @@ class Pool {
     public static function putPool(MySQL $mysql, $type = Pool::READ){
         if(null !== self::$MysqlPool){
             self::$MysqlPool->put($mysql, $type);
+        }
+    }
+
+    /**
+     * 初始化
+     */
+    public static function init(){
+        if(null == self::$MysqlPool){
+            $size = server("server.pool_size");
+            $size = is_numeric($size) && $size>0 ? intval($size) : 5;
+            self::$MysqlPool = new Pool($size);
         }
     }
 }

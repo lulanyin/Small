@@ -1,12 +1,12 @@
 <?php
-namespace app\server;
+namespace app\server\websocket;
 
 /**
- * 接收到新消息
- * Class messageController
- * @package app\server
+ * 连接关闭
+ * Class CloseController
+ * @package app\server\websocket
  */
-class messageController extends \Small\server\controller\messageController {
+class CloseController extends \Small\server\websocket\CloseController {
 
     /**
      * 默认使用父级处理

@@ -1,5 +1,7 @@
 <?php
-namespace Small\server\controller;
+namespace Small\server\websocket;
+
+use Small\server\ServerController;
 
 /**
  * 处理消息
@@ -29,6 +31,25 @@ class MessageController extends ServerController {
         //}
         if($json = @json_decode($this->frame->data)){
             $event = $json->event ?? '';
+            //
+            $prefix = server("server.websocket.home");
+            if($event == 'heartbeat'){
+                $ctrl = server("server.heartbeat");
+                if($ctrl && class_exists($prefix.$ctrl."Controller")){
+                    $className = $prefix.$ctrl."Controller";
+                    $controller = new $className();
+                }else{
+                    $controller = new HeartbeatController();
+                }
+                $controller->ws = $this->ws;
+                $controller->data = $this->data;
+                $controller->frame = $this->frame;
+                $controller->user = $this->user;
+                $controller->fd = $this->fd;
+                $controller->event = $event;
+                $controller->index();
+                return;
+            }
             $data = $json->data ?? [];
             $data = is_array($data) || is_object($data) ? (array)$data : [];
             //保存起来
@@ -44,8 +65,6 @@ class MessageController extends ServerController {
             }
             $eventArray = explode(".", $event);
             $eventArray = count($eventArray)<2 ? array_pad($eventArray, 2, "index") : $eventArray;
-            //
-            $prefix = server("server.home");
             $class = $prefix.join("\\", array_slice($eventArray, 0, -1))."Controller";
             if(!class_exists($class)){
                 $class = $prefix.join("\\", $eventArray)."Controller";

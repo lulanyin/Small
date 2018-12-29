@@ -1,5 +1,7 @@
 <?php
-namespace Small\server\controller;
+namespace Small\server\websocket;
+
+use Small\server\ServerController;
 
 /**
  * 客户端断开连接

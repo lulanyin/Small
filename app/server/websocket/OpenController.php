@@ -1,12 +1,12 @@
 <?php
-namespace app\server;
+namespace app\server\websocket;
 
 /**
  * 新连接
- * Class openController
- * @package app\server
+ * Class OpenController
+ * @package app\server\websocket
  */
-class openController extends \Small\server\controller\openController {
+class OpenController extends \Small\server\websocket\OpenController {
 
     /**
      * 执行默认的处理

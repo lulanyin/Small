@@ -1,10 +1,13 @@
 <?php
 namespace Small\server;
 
+use Small\lib\util\File;
 use Small\server\http\RequestController;
 use Small\Config;
 use Small\IServer;
 use Small\lib\cache\Cache;
+use Small\server\mysql\Pool;
+use Small\server\websocket\MessageController;
 
 /**
  *
@@ -30,6 +33,8 @@ class Server implements IServer {
      * @var \swoole_websocket_server
      */
     private $ws;
+
+    private $autoReloadProcessor;
 
     /**
      * server constructor.
@@ -67,6 +72,9 @@ class Server implements IServer {
         //异步任务完成
         $this->ws->on("finish", [$this, "finish"]);
 
+        //自动重载进程
+        $this->autoReloadProcessor = new \swoole_process([$this, 'autoReload']);
+        $this->ws->addProcess($this->autoReloadProcessor);
     }
 
     /**
@@ -75,6 +83,14 @@ class Server implements IServer {
      * @param int $worker_id
      */
     public function workerStart(\swoole_websocket_server $server, int $worker_id){
+        // 默认，在Worker启动时，初始化连接池
+        //Pool::init();
+        //加一条线程，进行监听文件变动
+        if($server->worker_id == 0){
+            $this->autoReloadGo($server);
+        }
+
+        // 自定义
         $set = server("server");
         if(isset($set['start'])){
             $ctrl = $set['home'].$set['start']."Controller";
@@ -86,6 +102,10 @@ class Server implements IServer {
                 $ctrl->index($worker_id);
             }
         }
+    }
+
+    public function workerExit(\swoole_websocket_server $server, int $worker_id){
+        echo "worker [{$worker_id}] : exit.".PHP_EOL;
     }
 
 
@@ -122,17 +142,35 @@ class Server implements IServer {
         $set = server("server");
         if(isset($set['message'])){
             $ctrl = $set['home'].$set['message']."Controller";
-            if(!class_exists($ctrl)){
-                return;
+            if(class_exists($ctrl)){
+                $ctrl = new $ctrl($server);
+                if($ctrl instanceof ServerController){
+                    $ctrl->frame = $frame;
+                    $ctrl->fd = $frame->fd;
+                    $ctrl->getCacheUser();
+                    $ctrl->index();
+                }else{
+                    $this->messageDefault($server, $frame);
+                }
+            }else{
+                $this->messageDefault($server, $frame);
             }
-            $ctrl = new $ctrl($server);
-            if($ctrl instanceof ServerController){
-                $ctrl->frame = $frame;
-                $ctrl->fd = $frame->fd;
-                $ctrl->getCacheUser();
-                $ctrl->index();
-            }
+        }else{
+            $this->messageDefault($server, $frame);
         }
+    }
+
+    /**
+     * 默认处理
+     * @param \swoole_websocket_server $server
+     * @param \swoole_websocket_frame $frame
+     */
+    private function messageDefault(\swoole_websocket_server $server, \swoole_websocket_frame $frame){
+        $ctrl = new MessageController($server);
+        $ctrl->frame = $frame;
+        $ctrl->fd = $frame->fd;
+        $ctrl->getCacheUser();
+        $ctrl->index();
     }
 
     /**
@@ -145,14 +183,29 @@ class Server implements IServer {
         $set = server("server");
         if(isset($set['request'])){
             $ctrl = $set['home'].$set['request']."Controller";
-            if(!class_exists($ctrl)){
-                return;
+            if(class_exists($ctrl)){
+                $ctrl = new $ctrl();
+                if($ctrl instanceof RequestController){
+                    $ctrl->index($request, $response);
+                }else{
+                    $this->requestDefault($request, $response);
+                }
+            }else{
+                $this->requestDefault($request, $response);
             }
-            $ctrl = new $ctrl();
-            if($ctrl instanceof RequestController){
-                $ctrl->index($request, $response);
-            }
+        }else{
+            $this->requestDefault($request, $response);
         }
+    }
+
+    /**
+     * 默认处理
+     * @param \swoole_http_request $request
+     * @param \swoole_http_response $response
+     */
+    private function requestDefault(\swoole_http_request $request, \swoole_http_response $response){
+        $ctrl = new RequestController();
+        $ctrl->index($request, $response);
     }
 
     /**
@@ -226,8 +279,6 @@ class Server implements IServer {
         }
     }
 
-
-
     /**
      * 实现接口
      */
@@ -238,5 +289,60 @@ class Server implements IServer {
         Cache::connect(2);
         Cache::clear();
         $this->ws->start();
+    }
+
+    /**
+     * 自动重载进程回调（死循环）
+     * @param \swoole_process $process
+     */
+    public function autoReload(\swoole_process $process){
+        while (true){
+            $version = Config::get("define.runtime")."/version.json";
+            $home = server("server.home");
+            $home = str_replace("\\", "/", $home);
+            //仅执更新控制器 + 模板
+            $controllersList = File::getAllFiles($home, "php");
+            //特定文件夹
+            $views = Config::get("define.views");
+            $viewsList = File::getAllFiles($views, "html|php|tpl", null);
+            $list = [];
+            foreach ($controllersList as $item){
+                $list[] = [
+                    "md5" => $item['md5'],
+                    "file"=> $item['path']
+                ];
+            }
+            foreach ($viewsList as $item){
+                $list[] = [
+                    "md5" => $item['md5'],
+                    "file"=> $item['path']
+                ];
+            }
+            if(is_file($version)){
+                $md5_old = md5_file($version);
+                $md5_new = md5(json_encode($list));
+                if($md5_old!=$md5_new){
+                    echo "server restart ...\r\n";
+                    //apc_clear_cache();
+                    opcache_reset();
+                    file_put_contents($version, json_encode($list));
+                    $this->ws->reload();
+                }
+            }else{
+                file_put_contents($version, json_encode($list));
+            }
+            sleep(5);
+        }
+    }
+
+    /**
+     * 每5秒自动去判断一次文件版本
+     * @param \swoole_websocket_server $server
+     */
+    public function autoReloadGo(\swoole_websocket_server $server){
+        $this->autoReloadProcessor->write('start');
+        $server->after(5000, function () use ($server){
+            $this->autoReloadGo($server);
+        });
     }
 }

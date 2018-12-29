@@ -5,6 +5,7 @@ use Small\annotation\parser\After;
 use Small\http\HttpController;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Small\server\http\RequestController;
 
 class AnnotationParser{
 
@@ -12,7 +13,7 @@ class AnnotationParser{
 
     /**
      * 处理注解
-     * @param HttpController $class
+     * @param HttpController|RequestController $class
      * @param string $method
      * @return IParser[]
      */

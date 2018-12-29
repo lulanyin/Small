@@ -1,12 +1,14 @@
 <?php
-namespace Small\server\controller;
+namespace Small\server\websocket;
+
+use Small\server\ServerController;
 
 /**
  * 接收心跳消息
  * Class heartbeatController
  * @package Small\server\controller
  */
-class HeartbeatController extends ServerController{
+class HeartbeatController extends ServerController {
 
     /**
      * 接收心跳消息

@@ -3,6 +3,7 @@ namespace Small\lib\view;
 
 use Small\Config;
 use Small\http\HttpController;
+use Small\server\http\RequestController;
 
 class View{
 
@@ -15,7 +16,13 @@ class View{
     //原始地址路劲，用于匹配模板
     public $path = null;
 
-    public function __construct(HttpController $controller, string $method, array $path)
+    /**
+     * View constructor.
+     * @param HttpController|RequestController $controller
+     * @param string $method
+     * @param array $path
+     */
+    public function __construct($controller, string $method, array $path)
     {
         $this->controller = $controller;
         $this->path = $path;
@@ -37,7 +44,7 @@ class View{
         $templatePath = Config::get("define.views")."/".str_replace("_", null, $this->path[0]);
         //公开配置，可用于模板
         $configs = Config::get("public");
-        $domain = $configs['domain'];
+        $domain = Config::get("domain");
         $smarty = new \Smarty();
         $smarty->left_delimiter = "{";
         $smarty->right_delimiter = "}";

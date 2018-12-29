@@ -1,7 +1,7 @@
 <?php
 namespace app\server\websocket\chat;
 
-use Small\server\controller\ServerController;
+use Small\server\ServerController;
 
 class sendController extends ServerController {
 
