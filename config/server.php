@@ -18,8 +18,6 @@ return [
                 "public"    => "web",
                 //后台 http://域名/admin
                 "admin"     => "admin",
-                //商户后台
-                "shop"      => "shop",
                 //接口 http://域名/api
                 "api"       => "api"
             ]
@@ -40,13 +38,13 @@ return [
             'package_max_length'    => 8092
         ],
         //控制器根目录
-        "home"      => "app\server\\",
-        //on($event) 默认值如下 {home}/Open ...
-        "open"          => "Open",
-        "message"       => "Message",
-        "request"       => "Request",
-        "heartbeat"     => "Heartbeat",
-        "close"         => "Close",
+        "home"          => "app\server\\",
+        //on($event) 默认值如下 {home}\xxxx ...
+        "open"          => "websocket\Open",
+        "message"       => "websocket\Message",
+        "request"       => "http\Request",
+        "heartbeat"     => "websocket\Heartbeat",
+        "close"         => "websocket\Close",
         "task"          => "Task",
         "finish"        => "Finish",
         //每条进程的连接池数量
@@ -63,8 +61,6 @@ return [
                 "public"    => "web",
                 //后台 http://域名/admin
                 "admin"     => "admin",
-                //商户后台
-                "shop"      => "shop",
                 //接口 http://域名/api
                 "api"       => "api"
             ]

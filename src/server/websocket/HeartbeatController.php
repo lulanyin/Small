@@ -17,6 +17,9 @@ class HeartbeatController extends ServerController {
      */
     public function index(...$args)
     {
+        //防继承时传入的 parent::index($args)
+        $args = count($args)==1 && is_array($args[0]) ? $args[0] : $args;
+
         // TODO: Implement index() method.
 
         $this->response('heartbeat', 0, 'Hi!');

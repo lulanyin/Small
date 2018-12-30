@@ -16,6 +16,9 @@ class MessageController extends ServerController {
      */
     public function index(...$args)
     {
+        //防继承时传入的 parent::index($args)
+        $args = count($args)==1 && is_array($args[0]) ? $args[0] : $args;
+
         if(server('debug')){
             echo "[{$this->fd}] : 发来消息".PHP_EOL;
             echo $this->frame->data.PHP_EOL;
