@@ -28,7 +28,7 @@ return [
         "host"      => "0.0.0.0",
         "port"      => 9600,
         "setting"  => [
-            'worker_num'            => 2,
+            'worker_num'            => 4,
             'max_request'           => 1024,
             'max_connection'        => 256,
             'daemonize'             => 0,
@@ -82,7 +82,7 @@ return [
             'pass'      => '123456',//兼容DB类
             'database'  => 'small',
             "charset"   => "utf8",
-            "prefix"    => 'pre_',
+            "prefix"    => '',
             'timeout'   => 5
         ],
         /*

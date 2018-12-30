@@ -7,7 +7,8 @@
  */
 namespace Small\model{
 
-    use Small\websocket\mysql\Query;
+    use Small\App;
+    use Small\server\mysql\Query;
     use Small\lib\util\Arr;
     use DB\DB;
     use DB\Query\QueryBuilder;
@@ -28,8 +29,8 @@ namespace Small\model{
 
         private $hasTablePrefix = true;
 
-        public function __construct($pool = false){
-            $this->pool = $pool;
+        public function __construct(){
+            $this->pool = App::$server;
             $this->db = $this->getNewDB();
             $this->hasTablePrefix = !empty($this->db->connection->prefix['read']);
         }

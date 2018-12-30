@@ -83,8 +83,6 @@ class Server implements IServer {
      * @param int $worker_id
      */
     public function workerStart(\swoole_websocket_server $server, int $worker_id){
-        // 默认，在Worker启动时，初始化连接池
-        //Pool::init();
         //加一条线程，进行监听文件变动
         if($server->worker_id == 0){
             $this->autoReloadGo($server);
@@ -104,6 +102,11 @@ class Server implements IServer {
         }
     }
 
+    /**
+     * worker 进程退出
+     * @param \swoole_websocket_server $server
+     * @param int $worker_id
+     */
     public function workerExit(\swoole_websocket_server $server, int $worker_id){
         echo "worker [{$worker_id}] : exit.".PHP_EOL;
     }
@@ -140,22 +143,22 @@ class Server implements IServer {
     public function message(\swoole_websocket_server $server, \swoole_websocket_frame $frame){
         //做一个路由
         $set = server("server");
-        if(isset($set['message'])){
-            $ctrl = $set['home'].$set['message']."Controller";
-            if(class_exists($ctrl)){
+        if (isset($set['message'])) {
+            $ctrl = $set['home'] . $set['message'] . "Controller";
+            if (class_exists($ctrl)) {
                 $ctrl = new $ctrl($server);
-                if($ctrl instanceof ServerController){
+                if ($ctrl instanceof ServerController) {
                     $ctrl->frame = $frame;
                     $ctrl->fd = $frame->fd;
                     $ctrl->getCacheUser();
                     $ctrl->index();
-                }else{
+                } else {
                     $this->messageDefault($server, $frame);
                 }
-            }else{
+            } else {
                 $this->messageDefault($server, $frame);
             }
-        }else{
+        } else {
             $this->messageDefault($server, $frame);
         }
     }
@@ -184,7 +187,7 @@ class Server implements IServer {
         if(isset($set['request'])){
             $ctrl = $set['home'].$set['request']."Controller";
             if(class_exists($ctrl)){
-                $ctrl = new $ctrl();
+                $ctrl = new $ctrl($this->ws);
                 if($ctrl instanceof RequestController){
                     $ctrl->index($request, $response);
                 }else{
@@ -204,7 +207,7 @@ class Server implements IServer {
      * @param \swoole_http_response $response
      */
     private function requestDefault(\swoole_http_request $request, \swoole_http_response $response){
-        $ctrl = new RequestController();
+        $ctrl = new RequestController($this->ws);
         $ctrl->index($request, $response);
     }
 

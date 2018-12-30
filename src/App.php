@@ -13,6 +13,8 @@ use Small\server\Server;
  */
 class App {
 
+    public static $server = false;
+
     /**
      * 初始化运行
      * @param bool $server 是不是运行 Swoole Server 服务
@@ -21,6 +23,7 @@ class App {
     public static function init(bool $server = false){
         self::before();
         if($server){
+            self::$server = true;
             //运行 server 服务，由 Swoole 拓展支持
             echo "+---------------------+\r\n";
             echo "| ♪♪♪♪♪♪ SMALL ♪♪♪♪♪♪ |\r\n";
