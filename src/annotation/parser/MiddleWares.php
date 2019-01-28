@@ -8,7 +8,7 @@ use Small\annotation\IParser;
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  * Class MiddleWares
- * @package app\lib\annotation\parser
+ * @package Small\annotation\parser
  */
 class MiddleWares implements IParser {
 

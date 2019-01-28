@@ -2,7 +2,7 @@
 namespace app\server\websocket;
 
 /**
- * 连接关闭
+ * [http, websocket]客户端连接关闭
  * Class CloseController
  * @package app\server\websocket
  */

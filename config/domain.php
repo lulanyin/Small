@@ -10,7 +10,7 @@ return [
     "assets_url"        => "{scheme}://assets.{host}",
     //附件地址
     "attachment_url"    => "{scheme}://attachment.{host}",
-    //上传文件地址
+    //上传文件地址（上传文件，使用传统的PHP-FPM处理，请绑定域名到/public目录）
     "upload_api"        => "{scheme}://files.{host}",
     //域名路由
     "route" => [

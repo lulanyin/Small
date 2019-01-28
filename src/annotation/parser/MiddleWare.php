@@ -9,7 +9,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  * Class MiddleWare
- * @package app\lib\annotation\parser
+ * @package Small\annotation\parser
  */
 class MiddleWare implements IParser {
 

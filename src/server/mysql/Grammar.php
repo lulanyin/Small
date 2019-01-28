@@ -693,7 +693,7 @@ class Grammar{
      * @return null
      */
     public function getTablePrefix($type="read"){
-        $config = Config::get("server.mysql");
+        $config = Config::get("private.mysql");
         $setting = !empty($config[$type]) ? $config[$type] : Arr::get($config, "default");
         if(!empty($setting)){
             return $setting["prefix"] ?? null;

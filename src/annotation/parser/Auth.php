@@ -8,12 +8,13 @@ use Small\lib\cache\Cache;
 use Small\lib\util\Request;
 use Small\model\models\LoginHistoryModel;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Small\server\http\RequestController;
 
 /**
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  * Class Auth
- * @package app\lib\annotation\parser
+ * @package Small\annotation\parser
  */
 class Auth implements IParser {
 
@@ -69,7 +70,11 @@ class Auth implements IParser {
         // TODO: Implement process() method.
         // 首先检测登录情况
         // 获取token
-        $token = Request::get("token", Request::post('token', Request::getCookie('token', Request::getSession('token'))));
+        if($class instanceof RequestController){
+            $token = $class->getQueryString('token', $class->getPostData('token', $class->getCookie('token')));
+        }else{
+            $token = Request::get("token", Request::post('token', Request::getCookie('token', Request::getSession('token'))));
+        }
         if(!empty($token)){
             if($info = Cache::get($token)){
                 //判断过期时间
@@ -88,7 +93,7 @@ class Auth implements IParser {
                     //判断是否都通过检测
                     if(!$bool2 || !$bool1){
                         //无权限
-                        if($class instanceof HttpController){
+                        if($class instanceof HttpController || $class instanceof RequestController){
                             if($class->isAjaxMethod()){
                                 $class->response(-1, lang("framework.auth.105"));
                             }else{
@@ -122,7 +127,7 @@ class Auth implements IParser {
             }
         }
         //未登录，将触发跳转
-        if($class instanceof HttpController){
+        if($class instanceof HttpController || $class instanceof RequestController){
             if($class->isAjaxMethod()){
                 $class->response(-1, lang("framework.not login"));
             }else{

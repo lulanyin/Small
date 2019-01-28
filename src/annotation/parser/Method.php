@@ -4,6 +4,7 @@ namespace Small\annotation\parser;
 use Small\annotation\IParser;
 use Small\http\HttpController;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Small\server\http\RequestController;
 
 /**
  * @Annotation
@@ -41,7 +42,11 @@ class Method implements IParser {
         }
         // TODO: Implement process() method.
         // 获取方法
-        $request_method = $_SERVER['REQUEST_METHOD'] ?? null;
+        if($class instanceof RequestController){
+            $request_method = $class->request->server['request_method'] ?? null;
+        }else{
+            $request_method = $_SERVER['REQUEST_METHOD'] ?? null;
+        }
         $bool = $request_method!==null;
         $step = "";
         if($bool){
@@ -52,7 +57,11 @@ class Method implements IParser {
                 $ajax = $ajax ? $ajax : stripos($str, "ajax")!==false;
             }
             if($ajax){
-                $http_x_requested_with = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? null;
+                if($class instanceof RequestController){
+                    $http_x_requested_with = $class->request->header['http_x_requested_with'] ?? null;
+                }else{
+                    $http_x_requested_with = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? null;
+                }
                 if($http_x_requested_with == "XMLHttpRequest" && $bool){
                     //
                     return;
@@ -60,20 +69,6 @@ class Method implements IParser {
             }elseif($bool){
                 return;
             }
-            /*
-            if($bool || ($bool && $ajax)){
-                if($bool){
-                    return;
-                }elseif($ajax){
-                    //查证是不是AJAX
-                    $http_x_requested_with = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? null;
-                    if($http_x_requested_with == "XMLHttpRequest"){
-                        //
-                        return;
-                    }
-                }
-            }
-            */
         }
         //未通过验证
         if($class instanceof HttpController){

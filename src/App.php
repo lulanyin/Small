@@ -13,6 +13,10 @@ use Small\server\Server;
  */
 class App {
 
+    /**
+     * 是否是 swoole server 方式运行
+     * @var bool
+     */
     public static $server = false;
 
     /**

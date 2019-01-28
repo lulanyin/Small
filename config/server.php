@@ -16,10 +16,8 @@ return [
             "list"      => [
                 //前台 http://域名/public
                 "public"    => "web",
-                //后台 http://域名/admin
-                "admin"     => "admin",
-                //接口 http://域名/api
-                "api"       => "api"
+                //文件上传服务
+                "files"     => "files"
             ]
         ]
     ],
@@ -72,35 +70,6 @@ return [
     ],
     //命令执行的根目录
     "commend" => "app\cmd\\",
-    //数据库配置
-    "mysql" => [
-        "default"   => [
-            'host'      => '127.0.0.1',
-            'port'      => 3306,
-            'user'      => 'root',
-            'password'  => '123456',
-            'pass'      => '123456',//兼容DB类
-            'database'  => 'small',
-            "charset"   => "utf8",
-            "prefix"    => '',
-            'timeout'   => 5
-        ],
-        /*
-        "read" => [ ... ],
-        "write"=> [ ... ]
-        */
-    ],
-    //redis
-    "redis" => [
-        'host'       => '127.0.0.1',
-        'port'       => 6379,
-        'password'   => '',
-        'select'     => 0,
-        'timeout'    => 0,
-        'expire'     => 0,
-        'persistent' => false,
-        'prefix'     => 'redis_small_',
-    ],
     //其它设置
     "setting"   => [
         //cookie加密字符

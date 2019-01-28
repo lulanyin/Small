@@ -22,7 +22,7 @@ class Redis{
     }
 
     public static function newRedis($int = 0){
-        $config = Config::get("server.redis");
+        $config = Config::get("private.redis");
         $config['select'] = $int;
         return new \DB\Cache\driver\Redis($config);
     }

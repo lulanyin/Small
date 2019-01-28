@@ -1,5 +1,8 @@
 <?php
-namespace app\lib\auth;
+namespace Small\lib\auth;
+
+use Small\Config;
+use Small\model\models\UserModel;
 
 class User extends AuthUser{
 
@@ -79,7 +82,7 @@ class User extends AuthUser{
     }
 
     public static function checkRegisterIP($ip){
-        $userSet = \app\Config::get("private.user");
+        $userSet = Config::get("private.user");
         if($userSet['same_ip_limit']>0){
             $m = new UserModel();
             $rows = $m->mainQuery()

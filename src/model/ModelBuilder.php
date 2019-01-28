@@ -12,6 +12,7 @@ namespace Small\model{
     use Small\lib\util\Arr;
     use DB\DB;
     use DB\Query\QueryBuilder;
+    use Small\Config;
 
     abstract class ModelBuilder {
 
@@ -175,7 +176,7 @@ namespace Small\model{
             if($this->pool){
                 return new Query();
             }
-            $config = server("mysql");
+            $config = Config::get("private.mysql");
             //非服务端多线程，使用DB
             if(!DB::getConnection()){
                 DB::init($config);

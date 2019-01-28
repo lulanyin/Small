@@ -11,6 +11,8 @@ class Pool {
     const READ = 'read';
     const WRITE = 'write';
 
+    private $length = 5;
+
     /**
      * @var Channel
      */
@@ -29,9 +31,14 @@ class Pool {
      */
     public function __construct($size = 5)
     {
-        $this->readPool = new Channel($size);
-        $this->writePool = new Channel($size);
-        for($i = 0; $i < $size; $i ++){
+        $this->length = $size;
+        $this->putConnect();
+    }
+
+    public function putConnect(){
+        $this->readPool = new Channel($this->length);
+        $this->writePool = new Channel($this->length);
+        for($i = 0; $i < $this->length; $i ++){
             $this->put($this->connect(Pool::READ), Pool::READ);
             $this->put($this->connect(Pool::WRITE), Pool::WRITE);
         }
@@ -57,7 +64,9 @@ class Pool {
      */
     public function get($type = Pool::READ){
         $mysql = $type==Pool::READ ? $this->readPool->pop(5) : $this->writePool->pop(5);
-        if(!$mysql->connected){
+        if($mysql == null){
+            return null;
+        }elseif(!$mysql->connected){
             return $this->connect($type);
         }
         return $mysql;
@@ -65,10 +74,10 @@ class Pool {
 
     /**
      * @param string $type
-     * @return bool|mixed
+     * @return null|MySQL
      */
     private function connect($type = Pool::READ){
-        $config = Config::get("server.mysql");
+        $config = Config::get("private.mysql");
         $name = $type==Pool::READ ? Pool::READ : Pool::WRITE;
         if(isset($config[$name])){
             $setting = $config[$name];
@@ -76,7 +85,7 @@ class Pool {
             $setting = isset($config["default"]) ? $config['default'] : null;
         }
         if(!is_array($setting)){
-            return false;
+            return null;
         }
         //配置
         $verify_config = [
@@ -92,7 +101,11 @@ class Pool {
         $mysql = new MySQL();
         //连接
         $res = $mysql->connect($verify_config);
-        return $res==false ? false : $mysql;
+        if(!$res){
+            //连接未成功
+            echo '[Mysql] : 数据库未连接...'.PHP_EOL;
+        }
+        return $res==false ? null : $mysql;
     }
 
 

@@ -5,13 +5,14 @@ use Small\annotation\IParser;
 use Small\lib\cache\Cache;
 use Small\lib\util\Request;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Small\server\http\RequestController;
 
 /**
  * 注入当前TOKEN资料中的UID给属性
  * @Annotation
  * @Target("PROPERTY")
  * Class Uid
- * @package app\annotation
+ * @package Small\annotation\parser
  */
 class Uid implements IParser {
 
@@ -38,7 +39,11 @@ class Uid implements IParser {
     public function process($class, string $target, string $targetType)
     {
         // TODO: Implement process() method.
-        $token = Request::get("token", Request::post('token', Request::getCookie('token', Request::getSession('token'))));
+        if($class instanceof RequestController){
+            $token = $class->getQueryString('token', $class->getPostData('token', $class->getCookie('token')));
+        }else{
+            $token = Request::get("token", Request::post('token', Request::getCookie('token', Request::getSession('token'))));
+        }
         if(!empty($token)) {
             if ($info = Cache::get($token)) {
                 //判断过期时间

@@ -8,7 +8,7 @@ use Small\annotation\IParser;
  * @Annotation
  * @Target("PROPERTY")
  * Class Inject
- * @package app\lib\annotation\parser
+ * @package Small\annotation\parser
  */
 class Inject implements IParser {
 

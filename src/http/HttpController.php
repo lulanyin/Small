@@ -1,12 +1,13 @@
 <?php
 namespace Small\http;
 
+use Small\IHttpController;
 use Small\lib\util\Request;
 use Small\lib\httpMessage\Response;
 use Small\lib\view\View;
 use Small\model\models\VisitLogModel;
 
-abstract class HttpController {
+abstract class HttpController implements IHttpController {
 
     /**
      * http response
@@ -97,11 +98,11 @@ abstract class HttpController {
     /**
      * 获取GET参数值
      * @param $name
-     * @param null $default
-     * @param null $message
+     * @param string $default
+     * @param string $message
      * @return mixed
      */
-    public function getQueryString($name, $default = null, $message = null){
+    public function getQueryString(string $name, string $default = null, string $message = null){
         $value = Request::get($name, $default);
         $need = !is_null($message);
         if($need && $value!="0" && (is_null($value) || empty($value))){
@@ -109,18 +110,15 @@ abstract class HttpController {
         }
         return $value;
     }
-    public function getQueryParam($name, $default = null, $message = null){
-        return $this->getQueryString($name, $default, $message);
-    }
 
     /**
      * 获取POST参数值
      * @param $name
-     * @param null $default
-     * @param null $message
+     * @param string $default
+     * @param string $message
      * @return mixed
      */
-    public function getPostData($name, $default = null, $message = null){
+    public function getPostData(string $name, string $default = null, string $message = null){
         $value = Request::post($name, $default);
         $need = !is_null($message);
         if($need && $value!="0" && (is_null($value) || empty($value))){
@@ -135,5 +133,11 @@ abstract class HttpController {
      */
     public function redirect(string $route){
         $this->response->redirect($route);
+    }
+
+    public function getCookie(string $name, string $default = null)
+    {
+        // TODO: Implement getCookie() method.
+        return Request::getCookie($name, $default);
     }
 }

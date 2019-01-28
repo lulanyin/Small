@@ -20,7 +20,7 @@ class indexController extends HttpController{
     {
         // TODO: Implement index() method.
         //连接数据库
-        $m = new UserModel(1);
+        $m = new UserModel();
         $row = $m->mainQuery()
             ->where('uid', 1)
             ->first();

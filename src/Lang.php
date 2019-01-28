@@ -27,10 +27,10 @@ class Lang {
         if(!empty($files)){
             foreach ($files as $file){
                 $name = substr($file['filename'],0, -4);
-                static::$languages[$name] = include $languageFilesPath."/{$file['filename']}";
+                self::$languages[$name] = include $languageFilesPath."/{$file['filename']}";
             }
         }else{
-            static::$languages = [];
+            self::$languages = [];
         }
     }
 
@@ -41,17 +41,17 @@ class Lang {
      * @return array|mixed|null|string
      */
     public static function getValue($key, $language=null){
-        if(is_null(static::$languages)){
-            static::loadLanguage($language);
+        if(is_null(self::$languages)){
+            self::loadLanguage($language);
         }
         $keys = explode(".", $key);
         if(count($keys)==1){
             $key = "default.{$key}";
         }else{
-            if(in_array($keys[0], array_keys(static::$languages))){
-                return Arr::get(static::$languages, $key);
+            if(in_array($keys[0], array_keys(self::$languages))){
+                return Arr::get(self::$languages, $key);
             }
         }
-        return Arr::get(static::$languages, $key);
+        return Arr::get(self::$languages, $key);
     }
 }

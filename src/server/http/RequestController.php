@@ -2,6 +2,9 @@
 namespace Small\server\http;
 
 use Small\Config;
+use Small\IHttpController;
+use Small\lib\util\Arr;
+use Small\lib\util\Str;
 use Small\lib\view\View;
 use Small\server\ServerController;
 
@@ -10,7 +13,7 @@ use Small\server\ServerController;
  * Class RequestController
  * @package Small\server\controller
  */
-class RequestController extends ServerController {
+class RequestController extends ServerController implements IHttpController {
 
     /**
      * @var View
@@ -28,6 +31,24 @@ class RequestController extends ServerController {
     public $response;
 
     /**
+     *
+     * @var array
+     */
+    public $GET = [];
+
+    /**
+     *
+     * @var array
+     */
+    public $POST = [];
+
+    /**
+     *
+     * @var array
+     */
+    public $COOKIES = [];
+
+    /**
      * 默认处理路由方式
      * @param mixed ...$args
      * @return mixed|void
@@ -40,6 +61,10 @@ class RequestController extends ServerController {
         // TODO: Implement index() method.
         if(isset($args[0]) && isset($args[1])){
             if($args[0] instanceof \swoole_http_request && $args[1] instanceof \swoole_http_response){
+                //GET, POST
+                $this->GET = is_array($args[0]->get) ? $args[0]->get : [];
+                $this->POST = is_array($args[0]->post) ? $args[0]->post : [];
+                $this->COOKIES = is_array($args[0]->cookie) ? $args[0]->cookie : [];
                 //处理路由
                 $this->request = $args[0];
                 $this->swoole_response = $args[1];
@@ -220,5 +245,89 @@ class RequestController extends ServerController {
             $response->withStatus($code)->withContent($debug ? $message : '')->send();
         }
         exit;
+    }
+
+    /**
+     * 获取GET
+     * @param string $name
+     * @param string|null $default
+     * @param string|null $message
+     * @return mixed|string
+     */
+    public function getQueryString(string $name, string $default = null, string $message = null)
+    {
+        // TODO: Implement getQueryString() method.
+        $fn = null;
+        if(stripos($name, ":")>0){
+            list($fn, $name) = explode(":", $name, 2);
+        }
+        $value = Arr::get($this->GET, $name, $default);
+        $value = empty($value) && !is_numeric($value) ? $default : $value;
+        $value = $fn ? Str::filter($fn, $value) : $value;
+        $need = !is_null($message);
+        if($need && $value!="0" && (is_null($value) || empty($value))){
+            $this->response($message);
+        }
+        $this->GET[$name] = $value;
+        return $value;
+    }
+
+    /**
+     * 获取POST
+     * @param string $name
+     * @param string|null $default
+     * @param string|null $message
+     * @return mixed
+     */
+    public function getPostData(string $name, string $default = null, string $message = null)
+    {
+        // TODO: Implement getPostData() method.
+        $fn = null;
+        if(stripos($name, ":")>0){
+            list($fn, $name) = explode(":", $name, 2);
+        }
+        $value = Arr::get($this->POST, $name, $default);
+        $value = empty($value) && !is_numeric($value) ? $default : $value;
+        $value = $fn ? Str::filter($fn, $value) : $value;
+        $need = !is_null($message);
+        if($need && $value!="0" && (is_null($value) || empty($value))){
+            $this->response($message);
+        }
+        $this->POST[$name] = $value;
+        return $value;
+    }
+
+    /**
+     * 获取Cookie
+     * @param string $name
+     * @param string|null $default
+     * @return mixed|string
+     */
+    public function getCookie(string $name, string $default = null)
+    {
+        // TODO: Implement getCookie() method.
+        return $this->COOKIES[$name] ?? $default;
+    }
+
+    /**
+     * 是不是AJAX请求
+     * @return bool|mixed
+     */
+    public function isAjaxMethod()
+    {
+        // TODO: Implement isAjaxMethod() method.
+        $http_x_requested_with = $this->request->header['http_x_requested_with'] ?? null;
+        return $http_x_requested_with == "XMLHttpRequest";
+    }
+
+    /**
+     * 跳转
+     * @param $route
+     * @return mixed|void
+     */
+    public function redirect($route)
+    {
+        // TODO: Implement redirect() method.
+        $this->response->redirect($route);
     }
 }
