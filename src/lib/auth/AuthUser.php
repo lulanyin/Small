@@ -8,6 +8,7 @@ use Small\lib\util\Str;
 use Small\model\models\LoginHistoryModel;
 use Small\model\models\UserGroupModel;
 use Small\model\models\UserModel;
+use Small\server\http\RequestController;
 
 class AuthUser{
 
@@ -62,18 +63,32 @@ class AuthUser{
      */
     public $admin = false;
 
+    //2019.1.29、新增
+    /**
+     * @var RequestController
+     */
+    public $controller = null;
+
     /**
      * 实例化时，可以选择自动检测登录
      * AuthUser constructor.
      * @param bool $autoLogin
      * @param int $expTime
+     * @param RequestController $controller
      */
-    public function __construct($autoLogin = true, $expTime = 86400)
+    public function __construct($autoLogin = true, $expTime = 86400, RequestController $controller = null)
     {
+        $this->controller = $controller;
         $this->expTime = is_numeric($autoLogin) && $autoLogin>0 ? $autoLogin : $expTime;
         if($autoLogin){
             //优选获取：$_GET['token'] -> $_POST['token'] -> $_COOKIE['token'] -> $_SESSION['token']
-            $token = Request::get("token", Request::post("token", Request::getCookie("token", Request::getSession("token"))));
+            if(null != $this->controller){
+                $token = $this->controller->getQueryString('token',
+                    $this->controller->getPostData('token',
+                        $this->controller->getCookie('token')));
+            }else{
+                $token = Request::get("token", Request::post("token", Request::getCookie("token", Request::getSession("token"))));
+            }
             if(!empty($token) && strlen($token)===32){
                 $this->loginByToken($token, $this->expTime);
             }

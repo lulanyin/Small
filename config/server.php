@@ -17,7 +17,11 @@ return [
                 //前台 http://域名/public
                 "public"    => "web",
                 //文件上传服务
-                "files"     => "files"
+                "files"     => "files",
+                //api
+                "api"       => "api",
+                //admin
+                "admin"     => "admin"
             ]
         ]
     ],
