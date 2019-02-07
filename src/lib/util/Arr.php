@@ -37,7 +37,10 @@ class Arr{
      * @param null $default
      * @return string|array|mixed|null
      */
-    public static function get(array $array, $path, $default=null){
+    public static function get(array $array, $path = null, $default=null){
+        if(null == $path){
+            return $array;
+        }
         $keys = explode(".", $path);
         $here = $array;
         foreach ($keys as $key){
@@ -59,6 +62,10 @@ class Arr{
      * @return array
      */
     public static function set(array &$array, $path, $value) : array {
+        if(null == $path){
+            $array = $value;
+            return $array;
+        }
         $keys = explode(".", $path);
         $len = count($keys);
         foreach ($keys as $i=>$key){

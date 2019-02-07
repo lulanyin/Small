@@ -24,13 +24,14 @@ class Config {
         $domain = include self::get("define.configs")."/domain.php";
         self::set("domain", Arr::parseValue($domain, self::$configs));
         //获取private的配置文件
-        self::loadPathConfig("private");
-        self::loadPathConfig("public");
+        //self::loadPathConfig("private");
+        //self::loadPathConfig("public");
     }
 
     /**
      * 加载所有配置
      * @param string $path
+     * @return array|bool
      */
     private static function loadPathConfig(string $path){
         $files = File::getFiles(self::get("define.configs")."/{$path}", "php", null);
@@ -42,20 +43,23 @@ class Config {
                 $name = substr($file['filename'], 0, -4);
                 $configs[$name] = $config;
             }
-            self::set($path, Arr::parseValue($configs, self::$configs));
+            return self::set($path, Arr::parseValue($configs, self::$configs));
         }
+        return false;
     }
 
     /**
      * 保存配置
      * @param string $name
      * @param array $values
+     * @return array
      */
     public static function set(string $name, array $values){
         if(isset(self::$configs[$name])){
             unset(self::$configs[$name]);
         }
         self::$configs[$name] = $values;
+        return $values;
     }
 
     /**
@@ -64,6 +68,19 @@ class Config {
      * @return string|array|null
      */
     public static function get(string $path = null){
-        return null==$path ? self::$configs : Arr::get(self::$configs, $path);
+        if(empty($path)){
+            return self::$configs;
+        }else{
+            $pathArr = explode(".", $path);
+            if(!isset(self::$configs[$pathArr[0]])){
+                if($values = self::loadPathConfig($pathArr[0])){
+                    return count($pathArr)>1 ? Arr::get($values, join(".", array_slice($pathArr, 1))) : $values;
+                }else{
+                    return null;
+                }
+            }else{
+                return Arr::get(self::$configs, $path);
+            }
+        }
     }
 }

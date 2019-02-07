@@ -87,7 +87,6 @@ class Server implements IServer {
         if($server->worker_id == 0){
             $this->autoReloadGo($server);
         }
-
         // 自定义
         $set = server("server");
         if(isset($set['start'])){
