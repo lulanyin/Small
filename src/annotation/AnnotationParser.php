@@ -9,49 +9,77 @@ use Small\server\http\RequestController;
 
 class AnnotationParser{
 
-    public static $annotations = [];
+    public $annotations = [];
+    
+    public $class;
+    public $method = null;
+
+    /**
+     * AnnotationParser constructor.
+     * @param HttpController|RequestController $class
+     * @param null $method
+     */
+    public function __construct($class, $method = null)
+    {
+        $this->class = $class;
+        $this->method = $method;
+    }
 
     /**
      * 处理注解
-     * @param HttpController|RequestController $class
-     * @param string $method
      * @return IParser[]
      */
-    public static function parse($class, $method){
+    public function parse(){
+        $class = $this->class;
+        $method = $this->method;
         try{
             $refClass = new \ReflectionClass($class);
             try{
                 $reader = new AnnotationReader();
-                if(!isset(static::$annotations[$refClass->name])){
+                if(!isset($this->annotations[$refClass->name])){
                     //获取类的所有注解
-                    static::$annotations[$refClass->name]['class'] = $reader->getClassAnnotations($refClass);
+                    $this->annotations[$refClass->name]['class'] = $reader->getClassAnnotations($refClass);
                     //获取所有属性
                     $properties = $refClass->getProperties();
-                    static::$annotations[$refClass->name]['property'] = [];
+                    $this->annotations[$refClass->name]['property'] = [];
                     foreach ($properties as $property){
                         //获取属性的所有注解
-                        static::$annotations[$refClass->name]['property'][$property->name] = $reader->getPropertyAnnotations($property);
+                        $this->annotations[$refClass->name]['property'][$property->name] = $reader->getPropertyAnnotations($property);
                     }
                     //设置空数组
-                    static::$annotations[$refClass->name]['method'] = [];
+                    $this->annotations[$refClass->name]['method'] = [];
                     //回收变量
                     unset($properties);
                 }
-                //获取执行方法的注解
-                $method = $refClass->getMethod($method);
-                static::$annotations[$refClass->name]['method'][$method->name] = $reader->getMethodAnnotations($method);
-                //处理当前方法使用到的所有注解
-                $after = static::process($class, $refClass->name, $method->name);
-                //回收变量
-                unset($refClass);
-                unset($reader);
-                unset($method);
-                return $after;
+                if($method !== null){
+                    //获取执行方法的注解
+                    $refMethod = $refClass->getMethod($method);
+                    $this->annotations[$refClass->name]['method'][$refMethod->name] = $reader->getMethodAnnotations($refMethod);
+                    //处理当前方法使用到的所有注解
+                    $after = $this->process($class, $refClass->name, $refMethod->name);
+                    //回收变量
+                    unset($refClass);
+                    unset($reader);
+                    unset($refMethod);
+                    return $after;
+                }else{
+                    unset($refClass);
+                    unset($reader);
+                    return [];
+                }
             }catch (AnnotationException $annotationException){
-                exit("AnnotationException : ".$annotationException->getMessage().PHP_EOL);
+                if($this->class instanceof RequestController){
+                    echo "AnnotationException : ".$annotationException->getMessage().PHP_EOL;
+                }else{
+                    exit("AnnotationException : ".$annotationException->getMessage().PHP_EOL);
+                }
             }
         }catch (\ReflectionException $e){
-            exit("ReflectionException : ".$e->getMessage().PHP_EOL);
+            if($this->class instanceof RequestController){
+                echo "ReflectionException : ".$e->getMessage().PHP_EOL;
+            }else{
+                exit("ReflectionException : ".$e->getMessage().PHP_EOL);
+            }
         }
     }
 
@@ -62,10 +90,10 @@ class AnnotationParser{
      * @param $method
      * @return IParser[]
      */
-    public static function process($class, $className, $method)
+    public function process($class, $className, $method)
     {
-        if (isset(static::$annotations[$className])) {
-            $annotations = static::$annotations[$className];
+        if (isset($this->annotations[$className])) {
+            $annotations = $this->annotations[$className];
             //处理类的注解
             if (!empty($annotations['class'])) {
                 foreach ($annotations['class'] as $classAnnotation) {

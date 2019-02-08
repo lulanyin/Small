@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  * Class After
- * @package app\annotation\parser
+ * @package Small\annotation\parser
  */
 class After implements IParser {
 

@@ -206,8 +206,12 @@ class Server implements IServer {
      * @param \swoole_http_response $response
      */
     private function requestDefault(\swoole_http_request $request, \swoole_http_response $response){
-        $ctrl = new RequestController($this->ws);
-        $ctrl->index($request, $response);
+        try{
+            $ctrl = new RequestController($this->ws);
+            $ctrl->index($request, $response);
+        }catch (\Exception $e){
+
+        }
     }
 
     /**

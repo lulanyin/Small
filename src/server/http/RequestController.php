@@ -21,6 +21,12 @@ class RequestController extends ServerController implements IHttpController {
     public $view;
 
     /**
+     * 模板
+     * @var null
+     */
+    public $template = null;
+
+    /**
      * @var \swoole_http_response
      */
     public $swoole_response;
@@ -77,7 +83,8 @@ class RequestController extends ServerController implements IHttpController {
                     //OPTIONS 请求
                     (new Response())
                         ->setResponse($this->swoole_response)
-                        ->processOptions();
+                        ->processOptions()
+                        ->send();
                 }else{
                     //
                     $path = $this->request->server['request_uri'];
@@ -155,11 +162,11 @@ class RequestController extends ServerController implements IHttpController {
                         $class->request = $this->request;
                         $class->fd = $this->request->fd;
                     }else{
-                        $this->whitStatus(404,"{$className} not instanceof RequestController");
+                        $this->whitStatus(404,"{$className} not instanceof RequestController", $pathArray);
                         return;
                     }
                     if(!method_exists($class, $method)){
-                        $this->whitStatus(404,"(new {$className}())->{$method}(); method not exists!");
+                        $this->whitStatus(404,"(new {$className}())->{$method}(); method not exists!", $pathArray);
                         return;
                     }
                     //
@@ -168,7 +175,7 @@ class RequestController extends ServerController implements IHttpController {
                         $modifierName = \Reflection::getModifierNames($mr->getModifiers());
                         //判断方法是不是公开的
                         if($modifierName[0]!="public"){
-                            $this->whitStatus(404, "(new {$className}())->{$method}(); not public method!");
+                            $this->whitStatus(404, "(new {$className}())->{$method}(); not public method!", $pathArray);
                             return;
                         }
                         //反射类，获取该类的方法列表，然后过滤掉继承类的方法，方法入口仅给
@@ -181,14 +188,14 @@ class RequestController extends ServerController implements IHttpController {
                             }
                         }
                         if(!in_array($method, $enableMethodList)){
-                            $this->whitStatus(404, "(new {$className}())->{$method}(); can execute parent method!");
+                            $this->whitStatus(404, "(new {$className}())->{$method}(); can execute parent method!", $pathArray);
                             return;
                         }
                         //实现...
                         $response = new Response($class, $method, $pathArray);
                         $response->send();
                     }catch (\ReflectionException $e){
-                        $this->whitStatus(502, "ReflectionException : ".$e->getMessage());
+                        $this->whitStatus(502, "ReflectionException : ".$e->getMessage(), $pathArray);
                         return;
                     }
                 }
@@ -229,10 +236,11 @@ class RequestController extends ServerController implements IHttpController {
      * 向浏览器发送状态结果，一般用于非200状态结果，如果是调试中，会输出文本
      * @param $code
      * @param $message
+     * @param $pathArray
      */
-    private function whitStatus($code, $message){
+    private function whitStatus($code, $message, $pathArray = ['web', 'index', 'index']){
         $debug = server('debug');
-        $response = new Response();
+        $response = new Response($this, 'index', $pathArray);
         if($debug){
             //输出消息
             $response->withJson([
@@ -241,10 +249,9 @@ class RequestController extends ServerController implements IHttpController {
             ])->send();
         }else{
             //输出 404
-            $response = new Response();
+            $response = new Response($this, 'index', $pathArray);
             $response->withStatus($code)->withContent($debug ? $message : '')->send();
         }
-        exit;
     }
 
     /**
@@ -325,7 +332,7 @@ class RequestController extends ServerController implements IHttpController {
      * @param $route
      * @return mixed|void
      */
-    public function redirect($route)
+    public function redirect(string $route)
     {
         // TODO: Implement redirect() method.
         $this->response->redirect($route);

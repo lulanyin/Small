@@ -17,5 +17,6 @@ class indexController extends RequestController{
             ->first();
         return $row;
         */
+        print_r(getBusiness());
     }
 }

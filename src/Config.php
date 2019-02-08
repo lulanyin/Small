@@ -68,7 +68,7 @@ class Config {
      * @return string|array|null
      */
     public static function get(string $path = null){
-        if(empty($path)){
+        if(null == $path){
             return self::$configs;
         }else{
             $pathArr = explode(".", $path);

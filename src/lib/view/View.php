@@ -29,6 +29,7 @@ class View{
         $this->assign('method', $method);
         $this->assign('me', $controller->user);
         $this->assign("url_path", join("/", $path));
+        $this->template = $controller->template;
     }
 
     public function assign($name, $value){
@@ -56,7 +57,10 @@ class View{
         foreach ($this->data as $key=>$value){
             $smarty->assign($key, $value);
         }
-        $template = !empty($this->template) ? $this->template : (join("/", array_slice($this->path, 1)).".html");
+        $template = !empty($this->template) ? $this->template : (join("/", array_slice($this->path, 1)));
+        $template = strrchr($template, ".html") == ".html"
+            || strrchr($template, ".htm") == ".htm"
+            || strrchr($template, ".tpl") == ".tpl" ? $template : ($template.".html");
         try{
             return $smarty->fetch($template);
         }catch (\Exception $e){

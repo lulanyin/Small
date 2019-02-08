@@ -11,7 +11,7 @@ use Small\server\http\RequestController;
  * @Target("METHOD")
  * 规定可访问方式
  * Class Method
- * @package app\lib\annotation\parser
+ * @package Small\annotation\parser
  */
 class Method implements IParser {
 

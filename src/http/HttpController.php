@@ -22,6 +22,12 @@ abstract class HttpController implements IHttpController {
     public $view;
 
     /**
+     * 模板
+     * @var null
+     */
+    public $template = null;
+
+    /**
      * 登录账号资料
      * @var array
      */

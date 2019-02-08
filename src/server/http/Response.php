@@ -60,6 +60,12 @@ class Response{
     private $pathArray = [];
 
     /**
+     * 是否已完成...
+     * @var bool
+     */
+    private $finish = false;
+
+    /**
      * 初始化
      * Response constructor.
      * @param RequestController $controller
@@ -75,7 +81,8 @@ class Response{
             //
             $controller->response = $this;
             //处理注解，如果有After注解，会返回After列表
-            $afterParsers = AnnotationParser::parse($controller, $method);
+            $annotation = new AnnotationParser($controller, $method);
+            $afterParsers = $annotation->parse();
             //开始执行
             $controller->view = new View($controller, $method, $pathArray);
             $result = $controller->{$method}();
@@ -221,6 +228,9 @@ class Response{
      * 向客户端发送结果数据
      */
     public function send(){
+        if($this->status == 301 || $this->finish){
+            return;
+        }
         //处理cookies
         if(!empty($this->cookies)){
             foreach ($this->cookies as $cookie){
@@ -245,6 +255,7 @@ class Response{
         //输出内容结果
         //echo $this->content ?? '';
         //echo round(microtime(true) - START_SECONDS, 5);
+        $this->finish = true;
         $this->response->end($this->content ?? '');
     }
 
@@ -341,6 +352,7 @@ class Response{
         $this->response->header("Access-Control-Allow-Origin", "*");
         $this->response->header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
         $this->response->header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods");
+        return $this;
     }
 
     /**
@@ -354,6 +366,6 @@ class Response{
         }elseif(stripos($route, "http")!==0){
             $route = url("/".($this->pathArray[0] ?? "")."/".$route);
         }
-        $this->redirect($route);
+        $this->response->redirect($route);
     }
 }
