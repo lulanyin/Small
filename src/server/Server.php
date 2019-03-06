@@ -2,6 +2,7 @@
 namespace Small\server;
 
 use Small\lib\util\File;
+use Small\middleware\IMiddleWare;
 use Small\server\http\RequestController;
 use Small\Config;
 use Small\IServer;
@@ -83,8 +84,10 @@ class Server implements IServer {
      * @param int $worker_id
      */
     public function workerStart(\swoole_websocket_server $server, int $worker_id){
+        echo "# ".$worker_id." Start".PHP_EOL;
         //加一条线程，进行监听文件变动
         if($server->worker_id == 0){
+            echo "add reload process".PHP_EOL;
             $this->autoReloadGo($server);
         }
         // 自定义
@@ -188,6 +191,7 @@ class Server implements IServer {
             if(class_exists($ctrl)){
                 $ctrl = new $ctrl($this->ws);
                 if($ctrl instanceof RequestController){
+                    $ctrl = $this->processMiddleWare('request', $ctrl, $request, $response);
                     $ctrl->index($request, $response);
                 }else{
                     $this->requestDefault($request, $response);
@@ -208,10 +212,51 @@ class Server implements IServer {
     private function requestDefault(\swoole_http_request $request, \swoole_http_response $response){
         try{
             $ctrl = new RequestController($this->ws);
+            $ctrl = $this->processMiddleWare('request', $ctrl);
             $ctrl->index($request, $response);
         }catch (\Exception $e){
 
         }
+    }
+
+    /**
+     * 处理中间键
+     * @param string $type
+     * @param ServerController $ctrl
+     * @param \swoole_http_request|null $request
+     * @param \swoole_http_response|null $response
+     * @return mixed|ServerController
+     */
+    private function processMiddleWare(string $type, ServerController $ctrl, \swoole_http_request $request = null, \swoole_http_response $response = null){
+        //判断
+        $set = server("server");
+        if(isset($set['middleware'])){
+            if(!empty($set['middleware'][$type])){
+                $middlewares = $set['middleware'][$type];
+                $middlewares = is_array($middlewares) ? $middlewares : [$middlewares];
+                foreach ($middlewares as $middleware){
+                    if(class_exists($middleware)){
+                        $ctrl = $this->updateCtrlMiddleWare($ctrl, $middleware, $request, $response);
+                    }
+                }
+            }
+        }
+        return $ctrl;
+    }
+
+    /**
+     * @param ServerController $ctrl
+     * @param $middleware
+     * @param \swoole_http_request|null $request
+     * @param \swoole_http_response|null $response
+     * @return ServerController
+     */
+    private function updateCtrlMiddleWare(ServerController $ctrl, $middleware, \swoole_http_request $request = null, \swoole_http_response $response = null){
+        $mw = new $middleware();
+        if($mw instanceof IMiddleWare){
+            return $mw->process($ctrl, $request, $response);
+        }
+        return $ctrl;
     }
 
     /**

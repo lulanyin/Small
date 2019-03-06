@@ -21,8 +21,8 @@ class App {
 
     /**
      * 初始化运行
-     * @param bool $server 是不是运行 Swoole Server 服务
-     * @return IServer
+     * @param bool $server
+     * @return Router|Server
      */
     public static function init(bool $server = false){
         self::before();

@@ -3,7 +3,7 @@ return [
     //规定是http还是https，尽量使用 https
     "scheme"            => "http",
     //域名
-    "host"              => "small.in",
+    "host"              => "small.app",
     //站点完整地址
     "web_url"           => "{scheme}://www.{host}",
     //静态文件地址

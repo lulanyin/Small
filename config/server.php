@@ -28,15 +28,15 @@ return [
     //server配置，若启动ws服务，需要
     "server" => [
         "host"      => "0.0.0.0",
-        "port"      => 9600,
+        "port"      => 9601,
         "setting"  => [
-            'worker_num'            => 4,
+            'worker_num'            => 2,
             'max_request'           => 1024,
             'max_connection'        => 256,
             'daemonize'             => 0,
             'dispatch_mode'         => 2,
             'log_file'              => RUNTIME.'/logs/server.log',
-            'task_worker_num'       => 4,
+            'task_worker_num'       => 2,
             'package_max_length'    => 8092
         ],
         //控制器根目录
@@ -70,6 +70,13 @@ return [
         //ws
         "websocket"     => [
             "home"      => "app\server\websocket\\"
+        ],
+        //middleweare
+        "middleware"    => [
+            "request"   => [
+                //实现 session
+                \Small\server\session\SessionMiddleWare::class
+            ]
         ]
     ],
     //命令执行的根目录
