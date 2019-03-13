@@ -2,7 +2,6 @@
 namespace Small\server\http;
 
 use Small\annotation\AnnotationParser;
-use Small\lib\httpMessage\Request;
 use Small\lib\view\View;
 
 class Response{
@@ -19,7 +18,7 @@ class Response{
 
     /**
      * cookies
-     * @var array
+     * @var array(Cookie)
      */
     private $cookies = [];
 
@@ -148,17 +147,11 @@ class Response{
 
     /**
      * 设置cookie
-     * @param $name
-     * @param $value
-     * @param int $time
+     * @param Cookie $cookie
      * @return Response
      */
-    public function withCookie(string $name, string $value, $time = 3600){
-        $this->cookies[] = [
-            "name"      => $name,
-            "value"     => $value,
-            "time"      => $time
-        ];
+    public function withCookie(Cookie $cookie){
+        $this->cookies[$cookie->name] = $cookie;
         return $this;
     }
 
@@ -168,7 +161,10 @@ class Response{
      * @return Response
      */
     public function withoutCookie(string $name){
-        return $this->withCookie($name, null, -1);
+        if(isset($this->cookies[$name])){
+            $this->cookies[$name] = null;
+        }
+        return $this;
     }
 
     /**
@@ -234,7 +230,16 @@ class Response{
         //处理cookies
         if(!empty($this->cookies)){
             foreach ($this->cookies as $cookie){
-                Request::setCookie($cookie['name'], $cookie['value'], $cookie['time']);
+                //Request::setCookie($cookie['name'], $cookie['value'], $cookie['time']);
+                $this->response->cookie(
+                    $cookie->name,
+                    $cookie->value,
+                    $cookie->expires,
+                    $cookie->path,
+                    $cookie->domain,
+                    $cookie->secure,
+                    $cookie->httponly
+                );
             }
         }
         //加入跨域

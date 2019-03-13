@@ -191,7 +191,7 @@ class Server implements IServer {
             if(class_exists($ctrl)){
                 $ctrl = new $ctrl($this->ws);
                 if($ctrl instanceof RequestController){
-                    $ctrl = $this->processMiddleWare('request', $ctrl, $request, $response);
+                    list($ctrl, $request, $response) = $this->processMiddleWare('request', $ctrl, $request, $response);
                     $ctrl->index($request, $response);
                 }else{
                     $this->requestDefault($request, $response);
@@ -212,7 +212,7 @@ class Server implements IServer {
     private function requestDefault(\swoole_http_request $request, \swoole_http_response $response){
         try{
             $ctrl = new RequestController($this->ws);
-            $ctrl = $this->processMiddleWare('request', $ctrl);
+            list($ctrl, $request, $response) = $this->processMiddleWare('request', $ctrl, $request, $response);
             $ctrl->index($request, $response);
         }catch (\Exception $e){
 
@@ -220,12 +220,11 @@ class Server implements IServer {
     }
 
     /**
-     * 处理中间键
      * @param string $type
      * @param ServerController $ctrl
      * @param \swoole_http_request|null $request
      * @param \swoole_http_response|null $response
-     * @return mixed|ServerController
+     * @return array(ServerController, \swoole_http_request, \swoole_http_response)
      */
     private function processMiddleWare(string $type, ServerController $ctrl, \swoole_http_request $request = null, \swoole_http_response $response = null){
         //判断
@@ -236,12 +235,12 @@ class Server implements IServer {
                 $middlewares = is_array($middlewares) ? $middlewares : [$middlewares];
                 foreach ($middlewares as $middleware){
                     if(class_exists($middleware)){
-                        $ctrl = $this->updateCtrlMiddleWare($ctrl, $middleware, $request, $response);
+                        return $this->updateCtrlMiddleWare($ctrl, $middleware, $request, $response);
                     }
                 }
             }
         }
-        return $ctrl;
+        return [$ctrl, $request, $response];
     }
 
     /**
@@ -249,14 +248,14 @@ class Server implements IServer {
      * @param $middleware
      * @param \swoole_http_request|null $request
      * @param \swoole_http_response|null $response
-     * @return ServerController
+     * @return array(ServerController, \swoole_http_request, \swoole_http_response)
      */
     private function updateCtrlMiddleWare(ServerController $ctrl, $middleware, \swoole_http_request $request = null, \swoole_http_response $response = null){
         $mw = new $middleware();
         if($mw instanceof IMiddleWare){
             return $mw->process($ctrl, $request, $response);
         }
-        return $ctrl;
+        return [$ctrl, $request, $response];
     }
 
     /**

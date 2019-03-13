@@ -313,7 +313,10 @@ class RequestController extends ServerController implements IHttpController {
     public function getCookie(string $name, string $default = null)
     {
         // TODO: Implement getCookie() method.
-        return $this->COOKIES[$name] ?? $default;
+        if(is_array($this->request->cookie)){
+            return $this->request->cookie[$name] ?? $default;
+        }
+        return $default;
     }
 
     /**
