@@ -3,6 +3,9 @@ namespace Small\annotation\parser;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Small\annotation\IParser;
+use Small\lib\auth\AuthUser;
+use Small\lib\auth\User;
+use Small\server\http\HttpController;
 
 /**
  * @Annotation
@@ -45,7 +48,15 @@ class Inject implements IParser {
      */
     public function process($class, string $target, string $targetType)
     {
-        $targetClass = new $this->name();
+        if($this->name == User::class){
+            if($class instanceof HttpController){
+                $targetClass = new $this->name(true, 86400, $class);
+            }else{
+                $targetClass = new $this->name();
+            }
+        }else{
+            $targetClass = new $this->name();
+        }
         if(method_exists($targetClass, "Inject")){
             $targetClass->Inject($class, $target, $targetType);
         }

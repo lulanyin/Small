@@ -44,7 +44,7 @@ namespace Small\model\models{
          */
         public function getErrorHistory($uid, $seconds = 3600){
             $time = time()-$seconds;
-            $m = new static();
+            $m = new LoginHistoryModel();
             $rows = $m->mainQuery("h")
                 ->where("h.uid", $uid)
                 ->where("h.clean", 0)
@@ -67,7 +67,7 @@ namespace Small\model\models{
                 $token = $this->getToken($uid);
             }
             //如果此UID已存在此TOKEN，则直接更新时间即可
-            $m = new static();
+            $m = new LoginHistoryModel();
             $history = $m->mainQuery()->where("uid", $uid)
                 ->where("token", $token)->first();
             if(!empty($history)){
@@ -105,7 +105,7 @@ namespace Small\model\models{
                 "token"     => $token ?? 'NULL',
                 "exp_time"  => $token ? time2datetime($now+$time) : time2datetime($now)
             ];
-            $m = new static();
+            $m = new LoginHistoryModel();
             $m->mainQuery()
                 ->insert($data);
         }

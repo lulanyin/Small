@@ -161,6 +161,9 @@ class RequestController extends ServerController implements IHttpController {
                         $class->swoole_response = $this->swoole_response;
                         $class->request = $this->request;
                         $class->fd = $this->request->fd;
+                        $class->GET = $this->GET;
+                        $class->POST = $this->POST;
+                        $class->COOKIES = $this->COOKIES;
                     }else{
                         $this->whitStatus(404,"{$className} not instanceof RequestController", $pathArray);
                         return;
@@ -217,7 +220,7 @@ class RequestController extends ServerController implements IHttpController {
     public function response($event = null, $error = 1, $message = '', $data = [])
     {
         $data = is_array($message) ? $message : null;
-        $message = is_string($error) ? $error : null;
+        $message = $error;
         $error = $event;
 
         $data = is_array($error) || is_object($error) ? $error : (is_array($message) || is_object($message) ? $message : $data);
@@ -332,7 +335,7 @@ class RequestController extends ServerController implements IHttpController {
 
     /**
      * 跳转
-     * @param $route
+     * @param string $route
      * @return mixed|void
      */
     public function redirect(string $route)

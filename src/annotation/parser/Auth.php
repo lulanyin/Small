@@ -9,6 +9,7 @@ use Small\lib\util\Request;
 use Small\model\models\LoginHistoryModel;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Small\server\http\RequestController;
+use Small\server\session\Session;
 
 /**
  * @Annotation
@@ -72,6 +73,10 @@ class Auth implements IParser {
         // 获取token
         if($class instanceof RequestController){
             $token = $class->getQueryString('token', $class->getPostData('token', $class->getCookie('token')));
+            if(empty($token)){
+                $session = new Session($class);
+                $token = $session->get("token");
+            }
         }else{
             $token = Request::get("token", Request::post('token', Request::getCookie('token', Request::getSession('token'))));
         }

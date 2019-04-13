@@ -1,0 +1,72 @@
+{if $part==1}
+<div class="field">
+    <label>每页显示</label>
+    <div class="ui icon buttons">
+        <a data-loading class="ui button{if $get.total==15} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'total', 15)}">15</a>
+        <a data-loading class="ui button{if $get.total==30} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'total', 30)}">30</a>
+        <a data-loading class="ui button{if $get.total==50} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'total', 50)}">50</a>
+        <a data-loading class="ui button{if $get.total==100} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'total', 100)}">100</a>
+    </div>
+</div>
+<div class="field">
+    <label>{$page.rows}行数据，{$page.page}/{$page.pages}页</label>
+    <div class="ui buttons">
+        <a data-loading class="ui button{if $page.page<=1} disabled{/if}"{if $page.page>1} href="{urlRebuild($url_path, $pageUrl, 'page', $page.page-1)}"{/if}><i class="icon angle left"></i> 上一页</a>
+        <div class="or"></div>
+        <a data-loading class="ui button{if $page.page>=$page.pages} disabled{/if}"{if $page.page<$page.pages} href="{urlRebuild($url_path, $pageUrl, 'page', $page.page+1)}"{/if}>下一页<i class="icon angle right"></i></a>
+    </div>
+</div>
+{else}
+{if $page.pages>1}
+<div class="">
+
+    {if $page.page>1}
+    <a class="ui button icon mini" href="{urlRebuild($url_path, $pageUrl, 'page', 1)}"><i class="icon angle double left"></i></a>
+    <a class="ui button icon mini" href="{urlRebuild($url_path, $pageUrl, 'page', $page.page-1)}"><i class="icon angle left"></i></a>
+    {/if}
+
+    {if $page.pages>10}
+
+    {for $i=1 to 5}
+    <a class="ui button icon mini{if $page.page==$i} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'page', $i)}">{$i}</a>
+    {/for}
+    <div class="ui input compact mini" style="width: 60px;"><input type="text" onkeyup="movePage(this);" value="{$page.page}"></div>
+    <script>
+        function movePage(ipt) {
+            if(window.event.key!='Enter'){
+                return;
+            }
+            var val = ipt.value;
+            if(!isNaN(val)){
+                val = parseInt(val);
+                val = val>0 ? val : 1;
+                var maxPage = {$page.pages};
+                var nowPage = {$page.page};
+                if(val==nowPage){
+                    return;
+                }
+                val = val<maxPage ? val : maxPage;
+                var url = "{urlRebuild($url_path, $pageUrl, 'page')}";
+                url += url.indexOf("?") > 0 ? "&" : "?";
+                window.location.href = url + "page=" + val;
+            }
+        }
+    </script>
+    {for $i=$page.pages-5 to $page.pages}
+    <a class="ui button icon mini{if $page.page==$i} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'page', $i)}">{$i}</a>
+    {/for}
+    {else}
+
+    {for $i=1 to $page.pages}
+    <a class="ui button icon mini{if $page.page==$i} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'page', $i)}">{$i}</a>
+    {/for}
+
+    {/if}
+
+    {if $page.page<$page.pages}
+    <a class="ui button icon mini" href="{urlRebuild($url_path, $pageUrl, 'page', $page.page+1)}"><i class="icon angle right"></i></a>
+    <a class="ui button icon mini" href="{urlRebuild($url_path, $pageUrl, 'page', $page.pages)}"><i class="icon angle double right"></i></a>
+    {/if}
+</div>
+{/if}
+{/if}

@@ -1,0 +1,179 @@
+{include "INC_header.html" title="会员管理"}
+<!-- 会员列表 -->
+<div class="pd-1rem">
+    <div class="ui breadcrumb">
+        <div class="section">后台管理</div>
+        <i class="right angle icon divider"></i>
+        <a data-loading data-href="user" class="section">会员管理</a>
+        {if !empty($parents)}
+        {foreach $parents as $item}
+        <i class="right angle icon divider"></i>
+        <a data-loading data-href="user?uid={$item.uid}" class="section" data-tooltip="{$item.phone}" data-position="right center">{$item.nickname|default:$item.phone}</a>
+        {/foreach}
+        {/if}
+        {if !empty($parent)}
+        <i class="right angle icon divider"></i>
+        <div class="section">{$parent.nickname|default:$parent.phone}</div>
+        {/if}
+        <i class="right angle icon divider"></i>
+        <div class="active section">会员列表</div>
+    </div>
+    <!-- 父级会员资料 -->
+    <table class="ui celled table">
+        <thead>
+        <tr>
+            <th colspan="14">当前查看的账号：{$parent.nickname|default:"未设置"}，注册时间：{$parent.register_time}，推广链接：<a class="link-text" target="_blank" data-tooltip="点击前往" href="{$domain.web_url}?vc={$parent.username}">{$domain.web_url}?invite={$parent.username}</a></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td width="80">账号信息</td>
+            <td>
+                <i class="icon user"></i>{$parent.username|default:"未设置"}
+                <i class="icon mobile"></i>{$parent.phone|default:"未设置"}
+                {if $parent.nickname!=$parent.phone && !empty($parent.nickname)}
+                <i class="icon at"></i>{$parent.nickname|default:"未设置"}
+                {/if}
+            </td>
+            <td width="120">状态：{if $parent.frozen==1 || $parent.frozen=='true'}<span class="red-text">已冻结</span>{else}正常{/if}</td>
+        </tr>
+        <tr>
+            <td colspan="8">
+                <button type="button" class="ui icon button mini teal" onclick="Modal.openFormModal('会员编辑：{$parent.username|default:$parent.phone}', urlParse('user/index/edit?uid={$parent.uid}'), 400, 320, window)"><i class="icon edit"></i> 编辑</button>
+                <button type="button" class="ui icon button mini blue" onclick="Modal.openFormModal('密码修改：{$parent.username|default:$parent.phone}', urlParse('user/index/passworduid={$parent.uid}'), 350, 270, window)"><i class="icon privacy"></i> 修改密码</button>
+                <button type="button" class="ui icon button mini green" onclick="Modal.openFrameModal('查看团队', urlParse('user/index/team?uid={$parent.uid}'))"><i class="icon sitemap"></i> 查看团队</button>
+                {if $parent.uid!=$me.uid}
+                {if $parent.frozen==1 || $parent.frozen=='true'}
+                <button type="button" class="ui icon button mini green" onclick="frozenSwitch({$parent.uid}, 0)"><i class="icon unlock"></i> 账号解冻</button>
+                {else}
+                <button type="button" class="ui icon button mini red" onclick="frozenSwitch({$parent.uid}, 1)"><i class="icon lock"></i> 冻结账号</button>
+                {/if}
+                {/if}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- 搜索 -->
+    <div class="filter-box">
+        <form class="ui form">
+            <div class="fields">
+                <div class="field six wide">
+                    <div class="ui left icon input action">
+                        <input type="text" name="keyword" value="{$get.keyword|default:''}" placeholder="输入用户名、名字、手机号查询">
+                        <i class="icon search"></i>
+                        <button class="ui button teal right labeled icon waves-effect">搜索<i class="icon search"></i></button>
+                    </div>
+                </div>
+                {if !empty($get.keyword)}
+                <div class="field">
+                    <a href="{urlRebuild($url_path, $pageUrl, 'keyword')}" class="ui button blue right labeled icon waves-effect">{$get.keyword}<i class="icon remove"></i></a>
+                </div>
+                {/if}
+                <div class="field">
+                    <button type="button" onclick="Modal.openFormModal('注册新账号', urlParse('user/index/register'), 400, 320, window)" class="ui button red waves-effect"><i class="icon user add"></i> 添加新会员</button>
+                </div>
+            </div>
+            <div class="fields">
+                <div class="field">
+                    <label>分类筛选</label>
+                    <div class="ui icon buttons">
+                        <a data-loading class="ui button{if empty($get.group)} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'group')}">全部</a>
+                        {foreach $userGroup as $g}
+                        <a data-loading class="ui button{if $get.group==$g.group_id} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'group', $g.group_id)}">{$g.group_name}</a>
+                        {/foreach}
+                    </div>
+                </div>
+                <div class="field">
+                    <label>账号状态</label>
+                    <div class="ui icon buttons">
+                        <a data-loading class="ui button{if is_null($get.frozen)} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'frozen')}">全部</a>
+                        <a data-loading class="ui button{if $get.frozen==1} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'frozen', 1)}">已冻结</a>
+                        <a data-loading class="ui button{if $get.frozen==0 && $get.frozen!=null} teal{/if}" href="{urlRebuild($url_path, $pageUrl, 'frozen', 0)}">正常使用</a>
+                    </div>
+                </div>
+            </div>
+            <div class="fields">
+                {include "INC_page.html" part=1}
+            </div>
+        </form>
+    </div>
+    <!-- 列表 -->
+    <table class="ui table teal striped selectable">
+        <thead>
+        <tr>
+            <th>会员资料</th>
+            <th width="120">推荐人</th>
+            <th width="100">会员类型</th>
+            <th width="100">注册时间</th>
+            <th width="120">注册IP</th>
+            <th width="50">冻结</th>
+            <th width="150">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $l}
+        <tr style="{if $l.frozen==1} color:red!important;{/if}">
+            <td>
+                <a class="link-text" data-href="user?uid={$l.uid}" data-position="right center" data-tooltip="点击查看下级会员"><i class="icon at"></i>{$l.nickname|default:'未设置'} <i class="icon mobile"></i>{$l.phone|default:'未设置'}</a>
+            </td>
+            <td>
+                {if $l.parent_uid>0}
+                <i class="icon at"></i>{$l.p_nick}<br>
+                <i class="icon mobile"></i>{$l.p_phone}
+                {else}
+                -
+                {/if}
+            </td>
+            <td>
+                {$l.group_name}
+            </td>
+            <td>{$l.register_time|date_format:"Y/m/d H:i:s"}</td>
+            <td>{$l.register_ipv4}</td>
+            <td>
+                {if $l.frozen==1}
+                <span data-tooltip="已冻结账号"><i class="icon check"></i></span>
+                {else}
+                -
+                {/if}
+            </td>
+            <td>
+                <div class="ui buttons basic">
+                    <button onclick="Modal.openFormModal('会员编辑：{$l.nickname|default:$l.phone}', urlParse('user/index/edit?uid={$l.uid}'), 400, 320, window)" class="ui button mini icon waves-effect"><i class="icon edit"></i></button>
+                    <button onclick="Modal.openFormModal('密码修改：{$l.nickname|default:$l.phone}', urlParse('user/index/password?uid={$l.uid}'), 320, 270, window)" class="ui button mini icon waves-effect"><i class="icon privacy"></i></button>
+                    <button onclick="Modal.openFrameModal('团队查看：{$l.nickname|default:$l.phone}', urlParse('user/index/team?uid={$l.uid}'))" class="ui button mini icon waves-effect"><i class="icon sitemap"></i></button>
+                    <button onclick="Modal.openFormModal('修改收款资料：{$l.nickname|default:$l.phone}', urlParse('user/index/edit_money?uid={$l.uid}'), 400, 500, window)" class="ui button mini icon waves-effect"><i class="icon money"></i></button>
+                    {if $me.uid!=$l.uid}
+                    <button onclick="frozenSwitch('{$l.uid}', {if $l.frozen==1}0{else}1{/if})" class="ui button mini icon waves-effect"><i class="icon{if $l.frozen==1} unlock{else} lock{/if}"></i></button>
+                    {/if}
+                </div>
+            </td>
+        </tr>
+        {foreachelse}
+        <tr>
+            <td colspan="20" style="text-align: center;padding:50px;">
+                <div style="color:#999;"><i class="icon info circle"></i> 没有任何数据可展示</div>
+                <br>
+                <a class="ui button basic waves-effect" onclick="location.reload();"><i class="icon refresh"></i> 刷新页面</a>
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+        {if $page.pages>1}
+        <tfoot>
+        <tr>
+            <th colspan="20">
+                <!-- 分页 -->
+                {include "INC_page.html" part=2}
+            </th>
+        </tr>
+        </tfoot>
+        {/if}
+    </table>
+</div>
+<script>
+    function frozenSwitch(uid, val) {
+        //var msg = val==1 ? '确定冻结账号？' : '确定解冻账号？';
+        Modal.openFormModal('账号冻结/解冻操作', urlParse('user/index/frozen?uid='+uid), 600, 300, window);
+    }
+</script>
+{include "INC_footer.html"}

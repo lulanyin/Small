@@ -54,6 +54,10 @@ class View{
         $smarty->setCompileDir(CACHE."/compile");
         $smarty->assign("configs", $configs);
         $smarty->assign("domain", $domain);
+        if($this->controller instanceof RequestController){
+            $this->assign('get', $this->controller->GET);
+            $this->assign('post', $this->controller->POST);
+        }
         foreach ($this->data as $key=>$value){
             $smarty->assign($key, $value);
         }

@@ -38,7 +38,7 @@ class Arr{
      * @return string|array|mixed|null
      */
     public static function get(array $array, $path = null, $default=null){
-        if(null == $path){
+        if(null === $path){
             return $array;
         }
         $keys = explode(".", $path);
@@ -62,7 +62,7 @@ class Arr{
      * @return array
      */
     public static function set(array &$array, $path, $value) : array {
-        if(null == $path){
+        if(null === $path){
             $array = $value;
             return $array;
         }

@@ -2,9 +2,9 @@
 namespace app\server\http\admin;
 
 use Small\annotation\parser\Method;
-use Small\annotation\parser\View;
 use Small\lib\auth\User;
 use Small\server\http\RequestController;
+use Small\server\session\Session;
 
 /**
  * Class loginController
@@ -14,7 +14,6 @@ class loginController extends RequestController{
 
     /**
      * 后台登录
-     * @View("login2")
      * @param mixed ...$args
      * @return mixed|void
      */
@@ -28,29 +27,37 @@ class loginController extends RequestController{
      * @Method("AJAX_POST")
      */
     public function submit(){
-        $username = $this->getPostData('trim:username', null, lang("framework.login.101"));
-        $password = $this->getPostData('password', null, lang("framework.login.102"));
-        $verify_code = $this->getPostData('trim:verify_code', null, lang("framework.login.103"));
-        //判断验证码是否正确
-        if(!matchVerifyCode($verify_code)){
-            $this->response(lang("framework.login.104"));
+        $username = $this->getPostData('trim:username');
+        if(empty($username)){
+            return $this->response(lang("framework.login.101"));
         }
-        resetVerifyCode();
-        $u = new User(false);
+        $password = $this->getPostData('password');
+        if(empty($password)){
+            return $this->response(lang("framework.login.102"));
+        }
+        $verify_code = $this->getPostData('trim:verify_code');
+        if(empty($verify_code)){
+            return $this->response(lang("framework.login.103"));
+        }
+        //判断验证码是否正确
+        $session = new Session($this);
+        if(!$session->matchVerifyCode($verify_code)){
+            return $this->response('验证码填写错误');
+        }
+        $u = new User(false, 86400, $this);
         if($u->login($username, $password)){
             $info = $u->userInfo;
             if($info['group_type']=='admin'){
-                //返回TOKEN和跳转地址
-                $this->response(0, [
+                return $this->response(0, [
                     "token"     => $info['token'],
                     "callback_url" => url("/admin")
                 ]);
             }else{
                 $u->logout();
-                $this->response(lang("framework.auth.105"));
+                return $this->response(lang("framework.auth.105"));
             }
         }else{
-            $this->response($u->errorInfo);
+            return $this->response($u->errorInfo);
         }
     }
 }

@@ -86,6 +86,10 @@ class AuthUser{
                 $token = $this->controller->getQueryString('token',
                     $this->controller->getPostData('token',
                         $this->controller->getCookie('token')));
+                if(empty($token)){
+                    $session = new \Small\server\session\Session($this->controller);
+                    $token = $session->get('token');
+                }
             }else{
                 $token = Request::get("token", Request::post("token", Request::getCookie("token", Request::getSession("token"))));
             }
@@ -138,7 +142,9 @@ class AuthUser{
             )
         );
         //得到完整会员数据
-        $tempInfo = $this->getInfo(["u.{$field}", $account]);
+        $m = new UserModel();
+        //$tempInfo = $this->getInfo(["u.{$field}", $account]);
+        $tempInfo = $m->where("u.{$field}", $account)->first();
         if(!empty($tempInfo)){
             $hm = new LoginHistoryModel();
             //1小时内，如果超过错误次数，则直接禁止登录
@@ -278,8 +284,13 @@ class AuthUser{
             "exp_seconds" => $this->expTime,
             "exp_time"  => $now + $this->expTime
         ]);
-        Request::setSession("token", $token);
-        Request::setCookie("token", $token, $this->expTime);
+        if(is_null($this->controller)){
+            Request::setSession("token", $token);
+            Request::setCookie("token", $token, $this->expTime);
+        }else{
+            $session = new \Small\server\session\Session($this->controller);
+            $session->set('token', $token);
+        }
         //返回新数据
         $userInfo['token'] = $token;
         //更新成员数据
@@ -293,7 +304,9 @@ class AuthUser{
      * @return array|null
      */
     private function getUidInfo($uid){
-        return $this->getInfo(["u.uid", $uid]);
+        $m = new UserModel();
+        $full_data = $m->where("u.uid", $uid)->first();
+        return !empty($full_data) ? $full_data : null;
     }
 
     /**
@@ -356,12 +369,28 @@ class AuthUser{
         if($this->isLogin){
             $token = $this->userInfo['token'];
         }else{
-            $token = Request::getCookie("token", Request::getSession("token"));
+            if($this->controller){
+                $token = $this->controller->getQueryString('token',
+                    $this->controller->getPostData('token',
+                        $this->controller->getCookie('token')));
+                if(empty($token)){
+                    $session = new \Small\server\session\Session($this->controller);
+                    $token = $session->get('token');
+                }
+            }else{
+                $token = Request::getCookie("token", Request::getSession("token"));
+            }
         }
         if(!empty($token)){
             Cache::remove($token);
-            Request::dropCookie("token");
-            Request::dropSession("token");
+            if(is_null($this->controller)){
+                Request::dropCookie("token");
+                Request::dropSession("token");
+            }else{
+                //清除
+                $session = new \Small\server\session\Session($this->controller);
+                $session->drop('token');
+            }
             //清除登录
             $hm = new LoginHistoryModel();
             $hm->mainQuery()

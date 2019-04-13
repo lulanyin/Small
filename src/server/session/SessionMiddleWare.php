@@ -29,11 +29,11 @@ class SessionMiddleWare implements IMiddleWare{
         $request = $args[0] ?? null;
         $response = $args[1] ?? null;
         if($request instanceof Request && $response instanceof Response){
-            if(empty($request->cookie) || !isset($request->cookie['PHPSESSION_ID'])) {
-                $response->cookie('PHPSESSION_ID', sha1(microtime(true) . Str::randomNumber(12)), time() + 3600);
+            if(empty($request->cookie) || !isset($request->cookie['PHP_SESSION_ID'])) {
+                $response->cookie('PHP_SESSION_ID', sha1(microtime(true) . Str::randomNumber(12)), time() + 3600, '/', null, null, true);
             }
-            if(is_array($request->cookie) && isset($request->cookie['PHPSESSION_ID'])){
-                $response->cookie('PHPSESSION_ID', $request->cookie['PHPSESSION_ID'], time() + 3600);
+            if(is_array($request->cookie) && isset($request->cookie['PHP_SESSION_ID'])){
+                $response->cookie('PHP_SESSION_ID', $request->cookie['PHP_SESSION_ID'], time() + 3600, '/', null, null, true);
             }
         }
         return [$controller, $request, $response];

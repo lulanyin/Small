@@ -216,15 +216,15 @@ if(!function_exists('urlRebuild')){
         $val_array = is_array($value) ? $value : [$value];
         $str = [];
         foreach ($key_array as $k=>$key){
-            $value = \Small\lib\util\Arr::get($val_array, $k);
-            if($value===null && isset($params[$key])){
+            $_value = $val_array[$k] ?? null;
+            if($_value===null && isset($params[$key])){
                 unset($params[$key]);
-            }elseif($value!==null){
-                $params[$key] = $value;
+            }elseif($_value!==null){
+                $params[$key] = $_value;
             }
         }
         foreach ($params as $k=>$val){
-            $str[] = "{$k}=$val";
+            $str[] = "{$k}={$val}";
         }
         return url($url.(!empty($str) ? (stripos($url, "?") ? "" : "?").join("&", $str) : ""));
     }

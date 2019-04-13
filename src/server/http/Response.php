@@ -91,7 +91,9 @@ class Response{
                     $parser->process($controller, $method, 'method');
                 }
             }
-            if(is_string($result)){
+            if($result instanceof Response){
+                $result->send();
+            }elseif(is_string($result)){
                 $this->withAddHeader("Content-Type", "text/plain")->withContent($result);
             }elseif(is_object($result) || is_array($result)){
                 $this->withJson($result);

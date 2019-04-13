@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" {$html_attrs|default:''}>
+<head>
+    <meta charset="UTF-8">
+    <!-- 优先使用 IE 最新版本和 Chrome -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <!-- iOS 设备 begin -->
+    <!-- 添加到主屏后的标题（iOS 6 新增） -->
+    <meta name="apple-mobile-web-app-title" content="{$title|default:lang('title')}">
+    <!-- 是否启用 WebApp 全屏模式，删除苹果默认的工具栏和菜单栏 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- 设置苹果工具栏颜色 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="green">
+    <!-- 忽略页面中的数字识别为电话，忽略email识别 -->
+    <meta name="format-detection" content="telphone=no, email=no">
+    <!-- 不让百度转码 -->
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 -->
+    <meta name="HandheldFriendly" content="true">
+    <!-- uc强制竖屏 -->
+    <meta name="screen-orientation" content="portrait">
+    <!-- QQ强制竖屏 -->
+    <meta name="x5-orientation" content="portrait">
+    <!-- UC强制全屏 -->
+    <meta name="full-screen" content="yes">
+    <!-- QQ强制全屏 -->
+    <meta name="x5-fullscreen" content="true">
+    <!-- UC应用模式 -->
+    <meta name="browsermode" content="application">
+    <!-- QQ应用模式 -->
+    <meta name="x5-page-mode" content="app">
+    <!-- iOS 图标 -->
+    <link rel="apple-touch-icon-precomposed" href="{$domain.assets_url}/framework/images/logo.png"/>
+    <!-- 添加 favicon icon -->
+    <link rel="shortcut icon" type="image/png" href="{$domain.assets_url}/framework/images/logo.png"/>
+    <!-- 页面标题 -->
+    <title>{$title|default:lang('title')}</title>
+    <!-- 样式 -->
+    <link href="{$domain.assets_url}/third-party/FontAwesome/css/font-awesome.css" rel="stylesheet">
+    <link href="{$domain.assets_url}/third-party/semantic-ui/semantic.min.css" rel="stylesheet">
+    <link href="{$domain.assets_url}/third-party/waves/waves.min.css" rel="stylesheet">
+    <link href="{$domain.assets_url}/other/css/widget.css" rel="stylesheet">
+    <link href="{$domain.assets_url}/lib/loader/icon.css" rel="stylesheet">
+    <!-- 脚本 -->
+    <script src="{$domain.assets_url}/third-party/jQuery/js.min.js"></script>
+    <script src="{$domain.assets_url}/third-party/semantic-ui/semantic.min.js"></script>
+    <script src="{$domain.assets_url}/third-party/waves/waves.min.js"></script>
+    <script src="{$domain.assets_url}/other/js/ToolTip.js"></script>
+    <script src="{$domain.assets_url}/other/js/modal.js?v=2"></script>
+    <script src="{$domain.assets_url}/other/js/loader.js"></script>
+    <script src="{$domain.assets_url}/other/js/ajax.js"></script>
+    <script src="{$domain.assets_url}/lib/audio/js.js"></script>
+    <!-- 样式 -->
+    <link rel="stylesheet" href="{$domain.assets_url}/framework/css/style.css{if server('debug')}?v={$smarty.now}{/if}">
+    <!-- -->
+    <script src="{$domain.assets_url}/framework/js/web.js"></script>
+    <script>
+        let RouteHere = "admin";
+        let RouteScheme = "{$domain.scheme}";
+        let RouteDomain = "{$configs.domain.route.admin|default:''}";
+        let RouteName = "admin";
+        let RouteNamePath = "{routPath('admin')}";
+
+        var TW = (function(c, p){
+            while (c!=p){
+                c = p;
+                p = p.parent;
+            }
+            return c;
+        })(window, window.parent);
+        Voice.url = "{$domain.assets_url}/lib/audio/wav/";
+    </script>
+</head>
+<body {$body_attrs|default:''}>

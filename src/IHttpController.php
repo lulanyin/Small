@@ -37,7 +37,7 @@ interface IHttpController{
 
     /**
      * 地址跳转
-     * @param $route
+     * @param string $route
      * @return mixed
      */
     public function redirect(string $route);
