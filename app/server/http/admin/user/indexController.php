@@ -3,6 +3,7 @@ namespace app\server\http\admin\user;
 
 use Small\annotation\parser\Auth;
 use Small\annotation\parser\Inject;
+use Small\annotation\parser\Method;
 use Small\lib\util\Str;
 use Small\model\models\UserModel;
 use Small\server\http\HttpController;
@@ -50,7 +51,10 @@ class indexController extends HttpController{
                     ->orderBy("u.floor", "asc")
                     ->select("u.uid, u.username, u.nickname, u.phone")
                     ->get();
-                $this->assign("parents", $parents);
+                foreach ($parents as &$p){
+                    $p['nickname'] = Str::base64Decode($p['nickname']);
+                }
+                $this->view->assign("parents", $parents);
             }
             if($parent['group_id']==2){
                 $db = $db->where("u.parent_uid", $parent['uid']);
@@ -130,6 +134,129 @@ class indexController extends HttpController{
         //用户分组
         $groups = $um->mainQuery()->newQuery()->from("user_group")->get();
         $this->view->assign('userGroup', $groups);
+    }
+
+    /**
+     * 冻结/解冻
+     * @Method("GET")
+     */
+    public function frozen(){
+        //权限判断
+        $uid = !empty($uid) ? $uid : $this->getQueryString("uid");
+        $uid = is_numeric($uid) && $uid>0 ? $uid : 0;
+        $bool = 1;
+        $message = "UID参数错误";
+        $um = new UserModel();
+        if($uid>0){
+            $db = $um->getQuery()
+                ->where("uid", $uid)
+                //自己无法冻结自己的账号
+                ->where("uid", "!=", $this->user['uid'])
+                //超级管理员不可冻结账号
+                ->where("founder", 0);
+            $data = $db->first();
+            if(!empty($data)){
+                $data['nickname'] = Str::base64Decode($data['nickname']);
+                $this->view->assign('data', $data);
+            }else{
+                $this->response('找不到账号');
+            }
+        }else{
+            $this->response('参数错误');
+        }
+    }
+
+    /**
+     * @Method("AJAX_POST")
+     */
+    public function frozenSave(){
+        $uid = $this->getPostData("uid", null, '缺少UID参数');
+        $uid = is_numeric($uid) && $uid>0 ? $uid : 0;
+        if($uid>0){
+            $um = new UserModel();
+            $db = $um->getQuery()
+                ->where("uid", $uid)
+                //自己无法冻结自己的账号
+                ->where("uid", "!=", $this->user['uid'])
+                //超级管理员不可冻结账号
+                ->where("founder", 0);
+            $data = $db->first();
+            if(!empty($data)){
+                $type = $this->getPostData('type');
+                $type = in_array($type, ['unlock', 'single', 'recommend', 'team']) ? $type : null;
+                if(is_null($type)){
+                    $this->response('参数错误');
+                }
+                $u = new User(false);
+                //二维密码验证
+                $session_sp = Request::getSession("admin_sp");
+                $sp = $this->getPOSTData("sp", null, empty($session_sp) ? "请填写安全密码" : null);
+                $sp = empty($sp) ? $session_sp : $sp;
+                //验证个人安全密码
+                if(User::checkSafePassword($this->user["uid"], $sp)){
+                    $this->response("管理员安全密码错误！");
+                }
+                Request::setSession("admin_sp", $sp);
+                $note = $this->getPostData('note', null, $type!='unlock' ? '缺少冻结备注' : null);
+                if($type=='unlock'){
+                    $db = $um->mainQuery()
+                        ->where('uid', $uid);
+                    if($db->update(['frozen'=>0])){
+                        $this->response(0, '操作成功');
+                    }else{
+                        $this->response('操作失败');
+                    }
+                }else{
+                    $db = $um->mainQuery();
+                    if($type=='single'){
+                        $db->where('uid', $uid);
+                    }elseif($type=='recommend'){
+                        $db->where('uid', $uid)
+                            ->orWhere("parent_uid", $uid);
+                    }else{
+                        $db->where('uid', $uid)
+                            ->orWhereFindInSet($uid, "parents_uid");
+                    }
+                    if($db->update(['frozen'=>1])){
+                        //记录
+                        $fhm = new FrozenHistoryModel();
+                        $log = [
+                            "uid"   => $uid,
+                            "reason"    => $note
+                        ];
+                        @$fhm->mainQuery()->insert($log);
+                        $this->response(0, '共冻结账号：'.$db->getAffectRows().'个');
+                    }else{
+                        $this->response('操作失败');
+                    }
+                }
+            }else{
+                $this->response('找不到账号');
+            }
+        }else{
+            $this->response('参数错误');
+        }
+    }
+
+    /**
+     * 修改部分资料
+     * @Method("GET")
+     */
+    public function edit(){
+        $uid = $this->getQueryString('uid', null, '缺少UID参数');
+        $uid = is_numeric($uid) && $uid>0 ? $uid : 0;
+        if($uid>0){
+            $um = new UserModel();
+            $edit = $um->where("u.uid", $uid)->first();
+            if(!empty($edit)){
+                $edit['nickname'] = Str::base64Decode($edit['nickname']);
+                $this->assign('data', $edit);
+            }else{
+                $this->response("找不到账号数据！");
+            }
+        }else{
+            $this->response('错误的UID参数');
+        }
     }
 
 }

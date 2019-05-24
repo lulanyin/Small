@@ -82,6 +82,9 @@ class Response{
             //处理注解，如果有After注解，会返回After列表
             $annotation = new AnnotationParser($controller, $method);
             $afterParsers = $annotation->parse();
+            if($this->finish){
+                return;
+            }
             //开始执行
             $controller->view = new View($controller, $method, $pathArray);
             $result = $controller->{$method}();

@@ -35,7 +35,7 @@
                 <i class="icon at"></i>{$parent.nickname|default:"未设置"}
                 {/if}
             </td>
-            <td width="120">状态：{if $parent.frozen==1 || $parent.frozen=='true'}<span class="red-text">已冻结</span>{else}正常{/if}</td>
+            <td width="120">状态：{if $parent.frozen==1}<span class="red-text">已冻结</span>{else}正常{/if}</td>
         </tr>
         <tr>
             <td colspan="8">
@@ -43,7 +43,7 @@
                 <button type="button" class="ui icon button mini blue" onclick="Modal.openFormModal('密码修改：{$parent.username|default:$parent.phone}', urlParse('user/index/passworduid={$parent.uid}'), 350, 270, window)"><i class="icon privacy"></i> 修改密码</button>
                 <button type="button" class="ui icon button mini green" onclick="Modal.openFrameModal('查看团队', urlParse('user/index/team?uid={$parent.uid}'))"><i class="icon sitemap"></i> 查看团队</button>
                 {if $parent.uid!=$me.uid}
-                {if $parent.frozen==1 || $parent.frozen=='true'}
+                {if $parent.frozen==1}
                 <button type="button" class="ui icon button mini green" onclick="frozenSwitch({$parent.uid}, 0)"><i class="icon unlock"></i> 账号解冻</button>
                 {else}
                 <button type="button" class="ui icon button mini red" onclick="frozenSwitch({$parent.uid}, 1)"><i class="icon lock"></i> 冻结账号</button>

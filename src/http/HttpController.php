@@ -70,8 +70,8 @@ abstract class HttpController implements IHttpController {
 
     /**
      * 输出消息结果
-     * @param $error
-     * @param $message
+     * @param int $error
+     * @param string $message
      * @param array $data
      */
     public function response($error=1, $message='', $data=[]){
@@ -103,10 +103,10 @@ abstract class HttpController implements IHttpController {
 
     /**
      * 获取GET参数值
-     * @param $name
-     * @param string $default
-     * @param string $message
-     * @return mixed
+     * @param string $name
+     * @param string|null $default
+     * @param string|null $message
+     * @return mixed|string
      */
     public function getQueryString(string $name, string $default = null, string $message = null){
         $value = Request::get($name, $default);
@@ -119,9 +119,9 @@ abstract class HttpController implements IHttpController {
 
     /**
      * 获取POST参数值
-     * @param $name
-     * @param string $default
-     * @param string $message
+     * @param string $name
+     * @param string|null $default
+     * @param string|null $message
      * @return mixed
      */
     public function getPostData(string $name, string $default = null, string $message = null){
@@ -141,6 +141,12 @@ abstract class HttpController implements IHttpController {
         $this->response->redirect($route);
     }
 
+    /**
+     * 获取Cookie
+     * @param string $name
+     * @param string|null $default
+     * @return mixed|string
+     */
     public function getCookie(string $name, string $default = null)
     {
         // TODO: Implement getCookie() method.

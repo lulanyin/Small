@@ -33,7 +33,7 @@ class Method implements IParser {
      * 实现注解的处理
      * @param $class
      * @param string $target
-     * @param string $targetType
+     * @param string|null $targetType
      */
     public function process($class, string $target, string $targetType = null)
     {
@@ -58,7 +58,7 @@ class Method implements IParser {
             }
             if($ajax){
                 if($class instanceof RequestController){
-                    $http_x_requested_with = $class->request->header['http_x_requested_with'] ?? null;
+                    $http_x_requested_with = $class->request->header['x-requested-with'] ?? null;
                 }else{
                     $http_x_requested_with = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? null;
                 }
@@ -73,6 +73,10 @@ class Method implements IParser {
         //未通过验证
         if($class instanceof HttpController){
             $class->response(lang("framework.distrust request method").$step);
+        }
+
+        if($class instanceof RequestController){
+            $class->response(lang("framework.distrust request method").$step)->send();
         }
     }
 }

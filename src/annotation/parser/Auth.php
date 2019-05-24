@@ -134,7 +134,11 @@ class Auth implements IParser {
         //未登录，将触发跳转
         if($class instanceof HttpController || $class instanceof RequestController){
             if($class->isAjaxMethod()){
-                $class->response(-1, lang("framework.not login"));
+                if($class instanceof HttpController){
+                    $class->response(-1, lang("framework.not login"));
+                }else{
+                    $class->response(-1, lang("framework.not login"))->send();
+                }
             }else{
                 //跳转到登录
                 $class->redirect("login");
