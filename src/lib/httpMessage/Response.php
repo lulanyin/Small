@@ -234,7 +234,7 @@ class Response{
      * @return bool
      */
     public function accessOriginProcess($path){
-        $domain = config("public.domain");
+        $domain = config("domain");
         $routeDomain = $_SERVER["HTTP_HOST"];//$route[$path] ?? $domain["host"];
         $host = $_SERVER['HTTP_ORIGIN'] ?? $routeDomain;
         if($host!=$routeDomain){
