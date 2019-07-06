@@ -57,14 +57,17 @@ class View{
         if($this->controller instanceof RequestController){
             $this->assign('get', $this->controller->GET);
             $this->assign('post', $this->controller->POST);
+        }else{
+            $this->assign('get', $_GET);
+            $this->assign('post', $_POST);
         }
         foreach ($this->data as $key=>$value){
             $smarty->assign($key, $value);
         }
         $template = !empty($this->template) ? $this->template : (join("/", array_slice($this->path, 1)));
         $template = strrchr($template, ".html") == ".html"
-            || strrchr($template, ".htm") == ".htm"
-            || strrchr($template, ".tpl") == ".tpl" ? $template : ($template.".html");
+        || strrchr($template, ".htm") == ".htm"
+        || strrchr($template, ".tpl") == ".tpl" ? $template : ($template.".html");
         try{
             return $smarty->fetch($template);
         }catch (\Exception $e){
