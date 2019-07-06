@@ -165,6 +165,7 @@ class Grammar{
                 if($needTransaction) {
                     $mysql->rollBack();
                     $this->query->transaction = false;
+                    $this->release(Pool::WRITE);
                 }
                 return false;
             }
@@ -173,6 +174,8 @@ class Grammar{
             $mysql->commit();
             $this->query->transaction = false;
         }
+        //不管怎么样，都要释放数据库连接
+        $this->release(Pool::WRITE);
         return true;
     }
 
@@ -216,6 +219,7 @@ class Grammar{
                 $this->query->error = $mysql->error;
                 $this->query->error_id = $mysql->errno;
                 DB::log("ID : [{$mysql->errno}]error : [{$mysql->error}]\r\nsql : {$queryString}\r\n".var_export($params, true));
+                $this->release(Pool::WRITE);
                 return false;
             }
         }else{
