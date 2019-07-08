@@ -1,3 +1,6 @@
 vendor/*
 .idea/*
 composer.lock
+
+/runtime/*
+.DS_Store
