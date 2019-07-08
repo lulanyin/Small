@@ -4,3 +4,4 @@ composer.lock
 
 /runtime/*
 .DS_Store
+/config/*
