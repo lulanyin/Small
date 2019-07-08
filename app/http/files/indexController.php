@@ -1,12 +1,12 @@
 <?php
 namespace app\http\files;
 
-use app\annotation\parser\Auth;
-use app\annotation\parser\Inject;
-use app\annotation\parser\Method;
+use Small\annotation\parser\Auth;
+use Small\annotation\parser\Inject;
+use Small\annotation\parser\Method;
 use app\http\HttpController;
-use app\model\models\FilesModel;
-use app\lib\auth\User;
+use Small\model\models\FilesModel;
+use Small\lib\auth\User;
 
 /**
  * @Auth()
