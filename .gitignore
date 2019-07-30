@@ -1,7 +1,10 @@
 vendor/*
 .idea/*
 composer.lock
-
-/runtime/*
 .DS_Store
-/config/*
+app/*
+bin/*
+config/*
+public/*
+resources/*
+runtime/*
