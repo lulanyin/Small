@@ -1,9 +1,9 @@
 <?php
 namespace Small;
 
-use Small\lib\util\Arr;
-use Small\lib\util\File;
-use Small\lib\util\Request;
+use Small\Util\Arr;
+use Small\Util\File;
+use Small\Http\Request;
 
 class Lang {
     /**
