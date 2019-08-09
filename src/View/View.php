@@ -46,11 +46,7 @@ class View{
         $this->controller = $controller;
         $this->path = $path;
         $this->assign('method', $method);
-        if(isset($controller->user)){
-            $this->assign('me', $controller->user);
-        }
         $this->assign("url_path", join("/", $path));
-        $this->template = $controller->template;
     }
 
     /**
@@ -71,6 +67,10 @@ class View{
      */
     public function fetch()
     {
+        if(property_exists($this->controller, 'user')){
+            $this->assign('me', $this->controller->user);
+        }
+        $this->template = $this->controller->template ?? $this->template;
         $templatePath = Config::get("define.views")."/".str_replace("_", null, $this->path[0]);
         //公开配置，可用于模板
         $configs = Config::get("public");
