@@ -96,7 +96,7 @@ class Request{
      * @return string
      */
     public static function getCookie($name="", $defaultValue=null){
-        if( !isset($_COOKIE[$name]) || !isset($_COOKIE[$name.'_zCKHash']) ){
+        if( !isset($_COOKIE[$name]) || !isset($_COOKIE[$name.'_hash']) ){
             return $defaultValue;
         }else{
             $setting = Config::get("server.setting") ?? [];
