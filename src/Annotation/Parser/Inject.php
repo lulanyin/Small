@@ -49,11 +49,11 @@ class Inject implements IParser {
      */
     public function process($class, string $target, string $targetType)
     {
-        if($class === HttpResponse::class){
+        if($this->name === HttpResponse::class){
             $class->{$target} = App::getContext("HttpResponse");
-        }elseif($class === View::class){
+        }elseif($this->name === View::class){
             $class->{$target} = App::getContext("View");
-        }elseif($class === HttpController::class){
+        }elseif($this->name === HttpController::class){
             $class->{$target} = App::getContext("HttpController");
         }else{
             $targetClass = new $this->name();
