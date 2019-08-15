@@ -3,20 +3,19 @@ namespace Small\Annotation\Parser;
 
 use Small\Annotation\IParser;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Small\Http\HttpController;
+use Small\App;
 
 /**
  * @Annotation
- * @Target({"CLASS", "METHOD"})
+ * @Target("CLASS")
  * Class After
  * @package Small\Annotation\Parser
  */
-class After implements IParser {
+class Controller implements IPaser
+{
 
-    /**
-     * 处理类
-     * @var array
-     */
-    private $class;
+    public $instance = null;
 
     /**
      * After constructor.
@@ -25,7 +24,15 @@ class After implements IParser {
     public function __construct(array $values)
     {
         if(isset($values['value'])){
-            $this->class = is_array($values['value']) ? $values['value'] : [$values['value']];
+            $this->instance = is_array($values['value']) ? $values['value'] : [$values['value']];
+        }
+        if(!empty($this->instance) && $this->instance instanceof HttpController){
+            $instance = new $this->instance();
+            $instance->response = App::getContext("response");
+            $instance->view = App::getContext("view");
+            App::setContext("instance", $instance);
+        }else{
+            $this->instance = App::getContext("instance");
         }
     }
 

@@ -34,7 +34,7 @@ abstract class HttpController {
      */
     public function __construct()
     {
-
+        
     }
 
     /**

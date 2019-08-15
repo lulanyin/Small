@@ -113,12 +113,15 @@ class HttpRouter implements IServer {
         }
         //处理类的执行
         $prefix = $this->home ?? Config::get("server.route.http.home");
-        $className = $prefix.join("\\", array_slice($pathArray, 0, -1))."Controller";
+        //控制器是否打开了使用注解类实现，未配置的控制器必须继承HttpController，配置了注解的，将使用注入方式
+        $annotation = Config::get("server.route.annotation");
+        $annotation = $annotation ?? false;
+        $className = $prefix.join("\\", array_slice($pathArray, 0, -1)).($annotation ? "" : "Controller");
         if(!class_exists($className)){
             $method = "index";
-            $className = $prefix.join("\\", $pathArray)."Controller";
+            $className = $prefix.join("\\", $pathArray).($annotation ? "" : "Controller");
             if(!class_exists($className)){
-                $className = $prefix.join("\\", $pathArray)."\indexController";
+                $className = $prefix.join("\\", $pathArray)."\index".($annotation ? "" : "Controller");
                 if(!class_exists($className)){
                     $this->whitStatus(404, "class {$className} not exists!");
                 }else{
@@ -159,6 +162,11 @@ class HttpRouter implements IServer {
         }catch (ReflectionException $e){
             $this->whitStatus(502, "ReflectionException : ".$e->getMessage());
         }
+
+    }
+
+
+    public function annotationStart(){
 
     }
 

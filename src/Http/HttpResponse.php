@@ -57,21 +57,46 @@ class HttpResponse{
     /**
      * 初始化
      * HttpResponse constructor.
-     * @param HttpController $controller
+     * @param $controller
      * @param string $method
      * @param array $pathArray
      */
-    public function __construct(HttpController $controller = null, string $method = null, array $pathArray = null)
+    public function __construct($controller = null, string $method = null, array $pathArray = null)
     {
         if(null!==$controller){
             $this->pathArray = $pathArray;
-            //
-            $controller->response = $this;
+            App::setContext("HttpResponse", $this);
+            //使用注解实现@Controller()
+            $annotation = Config::get("server.route.annotation");
+            $annotation = $annotation ?? false;
+            $annotation_controller = null;
+            if($annotation){
+                $annotation_controller = Config::get("server.route.annotation_controller");
+                $annotation_controller = !empty($annotation_controller) ? $annotation_controller : HttpController::class;
+                if(!class_exists($annotation_controller) || !($annotation_controller instanceof HttpController)){
+                    $annotation_controller = HttpController::class;
+                }
+            }
+            //UI视图处理类
+            $view = new View($controller, $method, $pathArray);
+            App::setContext("View", $view);
+            //开始执行
+            if(!empty($annotation_controller)){
+                $instance = new $annotation_controller();
+                $instance->response = $this;
+                $instance->view = $view;
+                App::setContext("HttpController", $instance);
+            }elseif($controller instanceof HttpController){
+                $controller->response = $this;
+                $controller->view = $view;
+                App::setContext("HttpController", $controller);
+            }else{
+                //什么都不是
+                $this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
+            }
             //处理注解，如果有After注解，会返回After列表
             $annotation = new AnnotationParser($controller, $method);
             $afterParsers = $annotation->parse();
-            //开始执行
-            $controller->view = new View($controller, $method, $pathArray);
             $result = $controller->{$method}();
             //处理After注解
             if(!empty($afterParsers)){

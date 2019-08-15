@@ -121,4 +121,24 @@ class App {
             }
         }
     }
+
+    /**
+     * 使用数组保存全局对象
+     */
+    public static $context = [];
+
+    /**
+     * 设置全局对象
+     */
+    public static function setContext(string $name, $object){
+        self::$context[$name] = $object;
+    }
+
+    /**
+     * 获取全局对象
+     */
+    public static function getContext(string $name, $default = null){
+        self::$context[$name] = self::$context[$name] ?? $default;
+        return self::$context[$name];
+    }
 }
