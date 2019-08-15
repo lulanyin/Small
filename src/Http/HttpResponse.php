@@ -92,7 +92,7 @@ class HttpResponse{
                 App::setContext("HttpController", $controller);
             }else{
                 //什么都不是
-                $this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
+                //$this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
             }
             //处理注解，如果有After注解，会返回After列表
             $annotation = new AnnotationParser($controller, $method);
@@ -101,7 +101,11 @@ class HttpResponse{
             //处理After注解
             if(!empty($afterParsers)){
                 foreach ($afterParsers as $parser){
-                    $parser->process($controller, $method, 'method');
+                    if($parser instanceof After){
+                        $parser->setResult($result)->process($controller, $method, 'method');
+                    }else{
+                        $parser->process($controller, $method, 'method');
+                    }
                 }
             }
             if(is_string($result)){
@@ -112,7 +116,7 @@ class HttpResponse{
                 //已经设置有内容
                 //$this->send();
             }else{
-                $this->withAddHeader("Content-Type", "text/html")->withContent($controller->view->fetch());
+                $this->withAddHeader("Content-Type", "text/html")->withContent($view->fetch());
             }
         }
     }
