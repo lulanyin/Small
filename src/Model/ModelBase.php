@@ -2,6 +2,7 @@
 namespace Small\Model;
 
 use Small\App;
+use Small\Config;
 use Small\DB\Query;
 
 /**
@@ -111,10 +112,11 @@ abstract class ModelBase {
 
     /**
      * 获取表名
+     * @param boolean $full
      * @return mixed
      */
-    public function getTableName(){
-        return $this->tableName;
+    public function getTableName($full = false){
+        return ($full ? Config::get("private.mysql.default.prefix") : "").$this->tableName;
     }
 
     /**

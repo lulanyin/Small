@@ -12,7 +12,7 @@ use Small\App;
  * Class After
  * @package Small\Annotation\Parser
  */
-class Controller implements IPaser
+class Controller implements IParser
 {
 
     public $instance = null;
@@ -28,11 +28,11 @@ class Controller implements IPaser
         }
         if(!empty($this->instance) && $this->instance instanceof HttpController){
             $instance = new $this->instance();
-            $instance->response = App::getContext("response");
-            $instance->view = App::getContext("view");
-            App::setContext("instance", $instance);
+            $instance->response = App::getContext("Response");
+            $instance->view = App::getContext("View");
+            App::setContext("HttpController", $instance);
         }else{
-            $this->instance = App::getContext("instance");
+            $this->instance = App::getContext("HttpController");
         }
     }
 

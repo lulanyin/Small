@@ -3,6 +3,7 @@ namespace Small\Annotation\Parser;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Small\Annotation\IParser;
+use Small\App;
 use Small\Http\HttpResponse;
 use Small\View\View;
 use Small\Http\HttpController;

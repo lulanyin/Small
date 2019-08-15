@@ -2,8 +2,10 @@
 namespace Small\Http;
 
 use Small\Annotation\AnnotationParser;
+use Small\Annotation\Parser\After;
 use Small\Config;
 use Small\View\View;
+use Small\App;
 
 /**
  * HTTP响应数据处理
@@ -77,22 +79,24 @@ class HttpResponse{
                     $annotation_controller = HttpController::class;
                 }
             }
-            //UI视图处理类
-            $view = new View($controller, $method, $pathArray);
-            App::setContext("View", $view);
+            $view = null;
             //开始执行
             if(!empty($annotation_controller)){
                 $instance = new $annotation_controller();
                 $instance->response = $this;
-                $instance->view = $view;
+                $instance->view = $view = new View($instance, $method, $pathArray);
+                App::setContext("View", $instance->view);
                 App::setContext("HttpController", $instance);
             }elseif($controller instanceof HttpController){
                 $controller->response = $this;
-                $controller->view = $view;
+                $controller->view = $view = new View($controller, $method, $pathArray);
+                App::setContext("View", $controller->view);
                 App::setContext("HttpController", $controller);
             }else{
                 //什么都不是
                 //$this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
+                $view = new View($controller, $method, $pathArray);
+                App::setContext("View", $view);
             }
             //处理注解，如果有After注解，会返回After列表
             $annotation = new AnnotationParser($controller, $method);
