@@ -9,9 +9,13 @@
  * @param $name
  * @param $value
  */
-function assign($name, $value){
+function assign($name, $value = null){
     if($view = \Small\App::getContext("View")){
-        $view->assign($name, $value);
+        if(is_array($name)){
+            $view->data = array_merge($view->data, $name);
+        }else{
+            $view->assign($name, $value);
+        }
     }
 }
 
