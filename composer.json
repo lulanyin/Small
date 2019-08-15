@@ -29,7 +29,8 @@
       "Small\\" : "src/"
     },
     "files": [
-      "src/Helpers/functions.php"
+      "src/Helpers/functions.php",
+      "src/Helpers/shortcut.php"
     ]
   },
   "repositories": {
