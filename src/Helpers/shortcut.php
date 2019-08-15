@@ -94,7 +94,12 @@ if(!function_exists("response")){
             "message"   => $message,
             "data"      => is_string($data) ? ['callback_url'=>$data] : $data
         ];
-        $response = \Small\App::getContext("Response");
+        if($response = \Small\App::getContext("HttpResponse")){
+            //从全局获取
+        }else{
+            //获取不到，新创建一个
+            $response = new \Small\Http\HttpResponse();
+        }
         if(\Small\Http\Request::isAjaxMethod()){
             $response->withJson($json)->send();
         }else{
