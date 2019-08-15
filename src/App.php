@@ -58,6 +58,15 @@ class App {
             $commend = $prefix.str_replace(".", "\\", $argv[1]);
             if(class_exists($commend)){
                 $params = count($argv)>2 ? array_slice($argv, 2) : [];
+                if(!empty($params)){
+                    $array = [];
+                    foreach($params as $param){
+                        $arr = explode("=", $param);
+                        $array[$arr[0]] = $arr[1] ?? true;
+                        $array[$arr[0]] = $array[$arr[0]]=="true" ? true : ($array[$arr[0]]=="false" ? false : $array[$arr[0]]);
+                    }
+                    $params = $array;
+                }
                 $cmd = new $commend($params);
                 if($cmd instanceof ICommend){
                     echo date("Y/m/d H:i:s")." running ... ".PHP_EOL;
