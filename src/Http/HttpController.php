@@ -62,21 +62,7 @@ class HttpController {
      * @param array $data
      */
     public function response($error=1, $message='', $data=[]){
-        $data = is_array($error) || is_object($error) ? $error : (is_array($message) || is_object($message) ? $message : $data);
-        $message = is_string($error) ? $error : (is_array($message) || is_object($message) ? null : $message);
-        $error = is_array($error) || is_object($error) ? 0 : (is_string($error) ? 1 : ($error==1 || $error==0 ? $error : $error));
-        //检测是Ajax访问，还是正常的GET,POST，如果是Ajax，使用json输出，如果是正常的GET,POST，则使用页面结果展示输出
-        $json = [
-            "error"     => $error,
-            "message"   => $message,
-            "data"      => is_string($data) ? ['callback_url'=>$data] : $data
-        ];
-        if($this->isAjaxMethod()){
-            $this->response->withJson($json)->send();
-        }else{
-            //需要一个展示消息的模板
-            $this->response->withText($json)->send();
-        }
+        response($error, $message, $data);
     }
 
     /**
@@ -95,12 +81,7 @@ class HttpController {
      * @return mixed|string
      */
     public function getQueryString(string $name, string $default = null, string $message = null){
-        $value = Request::get($name, $default);
-        $need = !is_null($message);
-        if($need && $value!="0" && (is_null($value) || empty($value))){
-            $this->response($message);
-        }
-        return $value;
+        return getUrlQuery($name, $default, $message);
     }
 
     /**
@@ -111,12 +92,7 @@ class HttpController {
      * @return mixed
      */
     public function getPostData(string $name, string $default = null, string $message = null){
-        $value = Request::post($name, $default);
-        $need = !is_null($message);
-        if($need && $value!="0" && (is_null($value) || empty($value))){
-            $this->response($message);
-        }
-        return $value;
+        return getPostData($name, $default, $message);
     }
 
     /**
