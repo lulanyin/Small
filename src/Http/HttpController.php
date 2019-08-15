@@ -8,7 +8,7 @@ use Small\View\View;
  * Class HttpController
  * @package Small\Http
  */
-abstract class HttpController {
+class HttpController {
 
     /**
      * http response
@@ -40,9 +40,10 @@ abstract class HttpController {
     /**
      * 必须存在的index方法，默认路由入口
      * @param mixed ...$args
-     * @return mixed
      */
-    abstract public function index(...$args);
+    public function index(...$args){
+
+    }
 
     /**
      * 绑定模板变量
