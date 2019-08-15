@@ -55,7 +55,7 @@ class Inject implements IParser {
             $class->{$target} = App::getContext("View");
         }elseif($this->name === HttpController::class){
             $class->{$target} = App::getContext("HttpController");
-        }else{
+        }elseif(class_exists($this->name)){
             $targetClass = new $this->name();
             if(method_exists($targetClass, "Inject")){
                 $targetClass->Inject($class, $target, $targetType);
