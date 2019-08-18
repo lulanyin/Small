@@ -31,7 +31,7 @@ function parseHttpData($value, $message = null){
         if($httpController = \Small\App::getContext("HttpController")){
             $httpController->response($message);
             return null;
-        }elseif($response = \Small\App::getContext("Response")){
+        }elseif($response = \Small\App::getContext("HttpResponse")){
             //从全局获取
         }else{
             //新建
