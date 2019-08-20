@@ -1,7 +1,6 @@
 <?php
 namespace Small\Annotation;
 
-
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ReflectionClass;

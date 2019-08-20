@@ -1,8 +1,7 @@
 <?php
 namespace Small\Http;
 
-use Small\Annotation\AnnotationParser;
-use Small\Annotation\Parser\After;
+use Small\Annotation\Annotation;
 use Small\Config;
 use Small\View\View;
 use Small\App;
@@ -87,6 +86,7 @@ class HttpResponse{
                 $instance->view = $view = new View($instance, $method, $pathArray);
                 App::setContext("View", $instance->view);
                 App::setContext("HttpController", $instance);
+                Annotation::process($instance);
             }elseif($controller instanceof HttpController){
                 $controller->response = $this;
                 $controller->view = $view = new View($controller, $method, $pathArray);
@@ -99,19 +99,7 @@ class HttpResponse{
                 App::setContext("View", $view);
             }
             //处理注解，如果有After注解，会返回After列表
-            $annotation = new AnnotationParser($controller, $method);
-            $afterParsers = $annotation->parse();
-            $result = $controller->{$method}();
-            //处理After注解
-            if(!empty($afterParsers)){
-                foreach ($afterParsers as $parser){
-                    if($parser instanceof After){
-                        $parser->setResult($result)->process($controller, $method, 'method');
-                    }else{
-                        $parser->process($controller, $method, 'method');
-                    }
-                }
-            }
+            $result = Annotation::process($controller, $method);
             if(is_string($result)){
                 $this->withAddHeader("Content-Type", "text/plain")->withContent($result);
             }elseif(is_object($result) || is_array($result)){

@@ -36,11 +36,20 @@ class After implements IParser {
 
     /**
      * 设置数据
+     * @param $result
      * @return After
      */
-    public function setResult($result){
+    public function setResult($result = null){
         $this->result = $result;
         return $this;
+    }
+
+    /**
+     * 获取
+     * @return mixed|null
+     */
+    public function getResult(){
+        return $this->result;
     }
 
     /**
@@ -56,7 +65,7 @@ class After implements IParser {
             if(class_exists($cls)){
                 $obj = new $cls();
                 if(method_exists($obj, "after")){
-                    $obj->after([
+                    $this->result = $obj->after([
                         "class"     => $class,
                         "target"    => $target,
                         "targetType"=> $targetType,

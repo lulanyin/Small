@@ -3,6 +3,7 @@ namespace Small\Annotation\Parser;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Small\Annotation\IParser;
+use Small\App;
 
 /**
  * @Annotation
