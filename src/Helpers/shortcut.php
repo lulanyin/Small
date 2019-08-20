@@ -63,6 +63,9 @@ function getUrlQuery(string $name, string $default = null, string $message = nul
 function getQueryString(string $name, string $default = null, string $message = null){
     return getUrlQuery($name, $default, $message);
 }
+function GET(string $name, string $default = null, string $message = null){
+    return getUrlQuery($name, $default, $message);
+}
 
 /**
  * 获取POST数据
@@ -74,6 +77,9 @@ function getQueryString(string $name, string $default = null, string $message = 
 function getPostData(string $name, string $default = null, string $message = null){
     $value = \Small\Http\Request::post($name, $default);
     return parseHttpData($value, $message);
+}
+function POST(string $name, string $default = null, string $message = null){
+    return getPostData($name, $default, $message);
 }
 
 /**
