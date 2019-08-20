@@ -115,6 +115,9 @@ class Connection {
      */
     public function connect($config = null, $type = 'read')
     {
+        if(isset($this->pdo[$type]) && $this->pdo[$type] instanceof PDO){
+            return $this->pdo[$type];
+        }
         $this->configs[$type] = $config ?? $this->configs[$type];
         $config = $this->configs[$type];
         //取参数
