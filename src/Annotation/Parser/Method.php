@@ -10,7 +10,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Target("METHOD")
  * 规定可访问方式
  * Class Method
- * @package Small\annotation\parser
+ * @package Small\Annotation\Parser
  */
 class Method implements IParser {
 

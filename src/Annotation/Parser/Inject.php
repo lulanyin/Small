@@ -3,6 +3,10 @@ namespace Small\Annotation\Parser;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Small\Annotation\IParser;
+use Small\App;
+use Small\Http\HttpResponse;
+use Small\View\View;
+use Small\Http\HttpController;
 
 /**
  * @Annotation
@@ -45,9 +49,17 @@ class Inject implements IParser {
      */
     public function process($class, string $target, string $targetType)
     {
-        $targetClass = new $this->name();
-        if(method_exists($targetClass, "Inject")){
-            $targetClass->Inject($class, $target, $targetType);
+        if($this->name === HttpResponse::class){
+            $class->{$target} = App::getContext("HttpResponse");
+        }elseif($this->name === View::class){
+            $class->{$target} = App::getContext("View");
+        }elseif($this->name === HttpController::class){
+            $class->{$target} = App::getContext("HttpController");
+        }elseif(class_exists($this->name)){
+            $targetClass = new $this->name();
+            if(method_exists($targetClass, "Inject")){
+                $targetClass->Inject($class, $target, $targetType);
+            }
         }
     }
 }

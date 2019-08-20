@@ -37,7 +37,7 @@ class View{
 
     /**
      * View constructor.
-     * @param HttpController $controller
+     * @param $controller
      * @param string $method
      * @param array $path
      */
@@ -70,7 +70,7 @@ class View{
         if(property_exists($this->controller, 'user')){
             $this->assign('me', $this->controller->user);
         }
-        $this->template = $this->controller->template ?? $this->template;
+        $this->template = property_exists($this->controller, 'template') && !empty($this->controller->template) ? $this->controller->template : $this->template;
         $templatePath = Config::get("define.views")."/".str_replace("_", null, $this->path[0]);
         //公开配置，可用于模板
         $configs = Config::get("public");

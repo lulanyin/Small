@@ -27,8 +27,12 @@ class View implements IParser{
     public function process($class, string $target, string $targetType)
     {
         // TODO: Implement process() method.
-        if(property_exists($class, 'template')){
-            $class->template = $this->template;
+        if($view = App::getContext("View")){
+            $view->template = $this->template;
+        }else{
+            if(property_exists($class, 'template')){
+                $class->template = $this->template;
+            }
         }
     }
 }

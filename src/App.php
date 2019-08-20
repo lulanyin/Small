@@ -58,6 +58,15 @@ class App {
             $commend = $prefix.str_replace(".", "\\", $argv[1]);
             if(class_exists($commend)){
                 $params = count($argv)>2 ? array_slice($argv, 2) : [];
+                if(!empty($params)){
+                    $array = [];
+                    foreach($params as $param){
+                        $arr = explode("=", $param);
+                        $array[$arr[0]] = $arr[1] ?? true;
+                        $array[$arr[0]] = $array[$arr[0]]=="true" ? true : ($array[$arr[0]]=="false" ? false : $array[$arr[0]]);
+                    }
+                    $params = $array;
+                }
                 $cmd = new $commend($params);
                 if($cmd instanceof ICommend){
                     echo date("Y/m/d H:i:s")." running ... ".PHP_EOL;
@@ -111,5 +120,25 @@ class App {
                 exit("未检测到常量设置：{$item}".PHP_EOL);
             }
         }
+    }
+
+    /**
+     * 使用数组保存全局对象
+     */
+    public static $context = [];
+
+    /**
+     * 设置全局对象
+     */
+    public static function setContext(string $name, $object){
+        self::$context[$name] = $object;
+    }
+
+    /**
+     * 获取全局对象
+     */
+    public static function getContext(string $name, $default = null){
+        self::$context[$name] = self::$context[$name] ?? $default;
+        return self::$context[$name];
     }
 }
