@@ -114,3 +114,11 @@ function redirect(string $url){
         $response->redirect($url);
     }
 }
+
+/**
+ * 检测是不是AJAX访问
+ * @return bool
+ */
+function isAjaxMethod(){
+    return \Small\Http\Request::isAjaxMethod();
+}

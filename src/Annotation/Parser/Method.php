@@ -2,8 +2,6 @@
 namespace Small\Annotation\Parser;
 
 use Small\Annotation\IParser;
-use Small\App;
-use Small\Http\HttpController;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
@@ -62,14 +60,6 @@ class Method implements IParser {
                 return;
             }
         }
-        //未通过验证
-        if($class instanceof HttpController){
-            $class->response(lang("framework.distrust request method").$step);
-        }else{
-            $ctrl = App::getContext("HttpController");
-            if($ctrl instanceof HttpController){
-                $ctrl->response(lang("framework.distrust request method").$step);
-            }
-        }
+        response(lang("framework.distrust request method").$step);
     }
 }
