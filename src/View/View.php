@@ -41,7 +41,7 @@ class View{
      * @param null|string $method
      * @param null|array $path
      */
-    public function __construct($controller = null, ?string $method = null, ?array $path = null)
+    public function __construct($controller = null, string $method = null, array $path = [])
     {
         $this->init($controller, $method, $path);
     }
@@ -63,7 +63,7 @@ class View{
      * @param string|null $method
      * @param array $path
      */
-    public function init($controller = null, ?string $method = null, ?array $path = [])
+    public function init($controller = null, string $method = null, array $path = [])
     {
         $this->controller = $controller;
         $this->path = $path;
