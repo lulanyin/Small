@@ -37,6 +37,7 @@ class HttpController {
     {
         $this->response = App::getContext("HttpResponse");
         $this->view = App::getContext("View");
+        App::setContext("HttpController", $this);
     }
 
     /**

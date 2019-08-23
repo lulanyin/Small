@@ -90,12 +90,7 @@ class HttpResponse{
             //开始执行
             if(!empty($annotation_controller)){
                 $instance = new $annotation_controller();
-                App::setContext("HttpController", $instance);
                 Annotation::process($instance);
-            }else{
-                //什么都不是
-                //$this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
-                App::setContext("HttpController", $controller);
             }
             //处理注解，如果有After注解，会返回After列表
             $result = Annotation::process($controller, $method);
