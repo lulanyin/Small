@@ -1,6 +1,7 @@
 <?php
 namespace Small\Http;
 
+use Small\App;
 use Small\View\View;
 
 /**
@@ -14,17 +15,17 @@ class HttpController {
      * http response
      * @var HttpResponse
      */
-    public $response;
+    public $response = null;
 
     /**
      * 模板
      * @var View
      */
-    public $view;
+    public $view = null;
 
     /**
      * 模板
-     * @var null
+     * @var null|string
      */
     public $template = null;
 
@@ -34,25 +35,17 @@ class HttpController {
      */
     public function __construct()
     {
-        
-    }
-
-    /**
-     * 必须存在的index方法，默认路由入口
-     * @param mixed ...$args
-     */
-    public function index(...$args){
-
+        $this->response = App::getContext("HttpResponse");
+        $this->view = App::getContext("View");
     }
 
     /**
      * 绑定模板变量
      * @param $name
      * @param $value
-     * @return View
      */
     public function assign($name, $value){
-        return $this->view->assign($name, $value);
+        assign($name, $value);
     }
 
     /**
@@ -100,6 +93,6 @@ class HttpController {
      * @param string $route
      */
     public function redirect(string $route){
-        $this->response->redirect($route);
+        redirect($route);
     }
 }

@@ -3,7 +3,6 @@ namespace Small\Http;
 
 use Small\Annotation\Annotation;
 use Small\Config;
-use Small\View\View;
 use Small\App;
 
 /**
@@ -64,9 +63,19 @@ class HttpResponse{
      */
     public function __construct($controller = null, string $method = null, array $pathArray = null)
     {
+        $this->init($controller, $method, $pathArray);
+    }
+
+    /**
+     * 方便二次调用
+     * @param null $controller
+     * @param string|null $method
+     * @param array|null $pathArray
+     * @return HttpResponse
+     */
+    public function init($controller = null, string $method = null, array $pathArray = null){
         if(null!==$controller){
             $this->pathArray = $pathArray;
-            App::setContext("HttpResponse", $this);
             //使用注解实现@Controller()
             $annotation = Config::get("server.route.annotation");
             $annotation = $annotation ?? false;
@@ -78,25 +87,15 @@ class HttpResponse{
                     $annotation_controller = HttpController::class;
                 }
             }
-            $view = null;
             //开始执行
             if(!empty($annotation_controller)){
                 $instance = new $annotation_controller();
-                $instance->response = $this;
-                $instance->view = $view = new View($instance, $method, $pathArray);
-                App::setContext("View", $instance->view);
                 App::setContext("HttpController", $instance);
                 Annotation::process($instance);
-            }elseif($controller instanceof HttpController){
-                $controller->response = $this;
-                $controller->view = $view = new View($controller, $method, $pathArray);
-                App::setContext("View", $controller->view);
-                App::setContext("HttpController", $controller);
             }else{
                 //什么都不是
                 //$this->withText("未定义的控制器，未继承HttpController，也未注解，无法处理该请求！")->send();
-                $view = new View($controller, $method, $pathArray);
-                App::setContext("View", $view);
+                App::setContext("HttpController", $controller);
             }
             //处理注解，如果有After注解，会返回After列表
             $result = Annotation::process($controller, $method);
@@ -108,9 +107,14 @@ class HttpResponse{
                 //已经设置有内容
                 //$this->send();
             }else{
-                $this->withAddHeader("Content-Type", "text/html")->withContent($view->fetch());
+                if($view = App::getContext("View")){
+                    $this->withAddHeader("Content-Type", "text/html")->withContent($view->fetch());
+                }else{
+                    $this->withText('no more content');
+                }
             }
         }
+        return $this;
     }
 
     /**
@@ -252,7 +256,7 @@ class HttpResponse{
         //输出内容结果
         echo $this->content ?? '';
         //echo round(microtime(true) - START_SECONDS, 5);
-        exit;
+        $this->exit();
     }
 
     /**
@@ -335,20 +339,22 @@ class HttpResponse{
     /**
      * 直接输出状态码
      * @param int $code
+     * @return HttpResponse
      */
     public function sendStatus(int $code){
         header("Content-Type:charset={$this->charset}", false, $code);
-        exit;
+        return $this;
     }
 
     /**
      * 处理OPTIONS请求
+     * @return HttpResponse
      */
     public function processOptions(){
         header("Access-Control-Allow-Origin:*");
         header('Access-Control-Allow-Methods:GET,POST,OPTIONS');
         header("Access-Control-Allow-Headers:X-Requested-With, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Requested-By, Access-Control-Allow-Methods");
-        exit;
+        return $this;
     }
 
     /**
@@ -363,5 +369,12 @@ class HttpResponse{
             $route = url("/".($this->pathArray[0] ?? "")."/".$route);
         }
         $this->withHeader("Location", $route)->send();
+    }
+
+    /**
+     * 退出
+     */
+    public function exit(){
+        exit();
     }
 }

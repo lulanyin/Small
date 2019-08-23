@@ -41,12 +41,9 @@ class View{
      * @param string $method
      * @param array $path
      */
-    public function __construct($controller, string $method, array $path)
+    public function __construct($controller = null, string $method = null, array $path = null)
     {
-        $this->controller = $controller;
-        $this->path = $path;
-        $this->assign('method', $method);
-        $this->assign("url_path", join("/", $path));
+        $this->init($controller, $method, $path);
     }
 
     /**
@@ -59,6 +56,19 @@ class View{
     {
         $this->data[$name] = $value;
         return $this;
+    }
+
+    /**
+     * @param $controller
+     * @param string|null $method
+     * @param array $path
+     */
+    public function init($controller, string $method = null, array $path = [])
+    {
+        $this->controller = $controller;
+        $this->path = $path;
+        $this->assign('method', $method);
+        $this->assign("url_path", join("/", $path));
     }
 
     /**

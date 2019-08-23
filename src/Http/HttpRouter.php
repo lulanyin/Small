@@ -5,8 +5,10 @@ use Reflection;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionObject;
+use Small\App;
 use Small\Config;
 use Small\IServer;
+use Small\View\View;
 
 /**
  * HTTP Router 处理正常伪静态路径
@@ -52,14 +54,17 @@ class HttpRouter implements IServer {
      * 开始处理路由
      */
     public function start(){
+        //全局响应类
+        $response = new HttpResponse();
+        App::setContext("HttpResponse", $response);
         //谷歌浏览器发起的，多一次请求
         if($this->uri == '/favicon.ico'){
             //直接 header status 200
-            (new HttpResponse())->withStatus(200)->send();
+            $response->withStatus(200)->send();
         }
         //OPTIONS请求
         if($_SERVER['REQUEST_METHOD'] == "OPTIONS"){
-            (new HttpResponse())->processOptions();
+            $response->processOptions()->exit();
         }
         //正常访问资源
         $path = $this->uri;
@@ -132,6 +137,10 @@ class HttpRouter implements IServer {
             $method = end($pathArray);
             $pathArray = array_slice($pathArray, 0, -1);
         }
+        //全局视图类
+        $view = new View();
+        App::setContext("View", $view);
+        //开始创建
         $class = new $className();
         if(!method_exists($class, $method)){
             $this->whitStatus(404,"(new {$className}())->{$method}(); method not exists!");
@@ -156,17 +165,12 @@ class HttpRouter implements IServer {
             if(!in_array($method, $enableMethodList)){
                 $this->whitStatus(404, "(new {$className}())->{$method}(); can execute parent method!");
             }
-            //实现...
-            $response = new HttpResponse($class, $method, $pathArray);
-            $response->send();
+            //Response 处理 ...
+            $view->init($class, $method, $pathArray);
+            $response->init($class, $method, $pathArray)->send();
         }catch (ReflectionException $e){
             $this->whitStatus(502, "ReflectionException : ".$e->getMessage());
         }
-
-    }
-
-
-    public function annotationStart(){
 
     }
 
@@ -179,16 +183,14 @@ class HttpRouter implements IServer {
         $debug = server('debug');
         if($debug){
             //输出消息
-            echo json_encode([
+            exit(json_encode([
                 "status"    => $code,
                 "message"   => $message
-            ]).PHP_EOL;
+            ]).PHP_EOL);
         }else{
             //输出 404
-            $response = new HttpResponse();
-            $response->withStatus($code)->withContent($debug ? $message : '')->send();
+            App::getContext("HttpResponse")->withStatus($code)->withContent($debug ? $message : '')->send();
         }
-        exit;
     }
 
 }
