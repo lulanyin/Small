@@ -26,10 +26,8 @@ class Controller implements IParser
         if(isset($values['value'])){
             $this->instance = is_array($values['value']) ? $values['value'] : [$values['value']];
         }
-        if(!empty($this->instance) && $this->instance instanceof HttpController){
-            $instance = new $this->instance();
-            $instance->response = App::getContext("Response");
-            $instance->view = App::getContext("View");
+        $instance = new $this->instance();
+        if(!empty($this->instance) && $instance instanceof HttpController){
             App::setContext("HttpController", $instance);
         }else{
             $this->instance = App::getContext("HttpController");
