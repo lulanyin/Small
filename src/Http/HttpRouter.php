@@ -95,6 +95,7 @@ class HttpRouter implements IServer {
             $pathArray = !empty($path) ? explode("/", $path) : [
                 "index", "index"
             ];
+            $pathLen = count($pathArray);
             //至少为2长度 [class, ...method]
             if(count($pathArray)<2){
                 $pathArray = array_pad($pathArray, 2, "index");
@@ -112,6 +113,7 @@ class HttpRouter implements IServer {
             }
             //替换
             $pathArray[0] = $httpRoute["list"][$pathArray[0]];
+            $pathLen = count($pathArray);
             if(count($pathArray)<3){
                 $pathArray = array_pad($pathArray, 3, "index");
             }
@@ -128,7 +130,12 @@ class HttpRouter implements IServer {
             if(!class_exists($className)){
                 $className = $prefix.join("\\", $pathArray)."\index".($annotation ? "" : "Controller");
                 if(!class_exists($className)){
-                    $this->whitStatus(404, "class {$className} not exists!");
+                    $method = $pathLen<3 ? $pathArray[count($pathArray)-2] : end($pathArray);
+                    $pathArray = array_merge(array_slice($pathArray, 0, $pathLen<3 ? -2 : -1), ["index"]);
+                    $className = $prefix.join("\\", $pathArray).($annotation ? "" : "Controller");
+                    if(!class_exists($className)) {
+                        $this->whitStatus(404, "class {$className} not exists!");
+                    }
                 }else{
                     $pathArray[] = "index";
                 }
@@ -184,9 +191,9 @@ class HttpRouter implements IServer {
         if($debug){
             //输出消息
             exit(json_encode([
-                "status"    => $code,
-                "message"   => $message
-            ]).PHP_EOL);
+                    "status"    => $code,
+                    "message"   => $message
+                ]).PHP_EOL);
         }else{
             //输出 404
             App::getContext("HttpResponse")->withStatus($code)->withContent($debug ? $message : '')->send();
