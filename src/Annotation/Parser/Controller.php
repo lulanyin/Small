@@ -24,13 +24,13 @@ class Controller implements IParser
     public function __construct(array $values)
     {
         if(isset($values['value'])){
-            $this->instance = is_array($values['value']) ? $values['value'] : [$values['value']];
+            $this->instance = is_array($values['value']) ? $values['value'][0] : $values['value'];
         }
-        $instance = new $this->instance();
-        if(!empty($this->instance) && $instance instanceof HttpController){
-            App::setContext("HttpController", $instance);
-        }else{
-            $this->instance = App::getContext("HttpController");
+        if(class_exists($this->instance)){
+            $instance = new $this->instance();
+            if($this->instance instanceof HttpController){
+                App::setContext("HttpController", $instance);
+            }
         }
     }
 
