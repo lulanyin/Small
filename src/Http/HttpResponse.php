@@ -94,13 +94,15 @@ class HttpResponse{
             }
             //处理注解，如果有After注解，会返回After列表
             $result = Annotation::process($controller, $method);
-            if(is_string($result)){
+            if($result instanceof HttpResponse){
+                $result->send();
+            }elseif(is_string($result)){
                 $this->withAddHeader("Content-Type", "text/plain")->withContent($result);
             }elseif(is_object($result) || is_array($result)){
                 $this->withJson($result);
             }elseif(!empty($this->content)){
                 //已经设置有内容
-                //$this->send();
+                $this->send();
             }else{
                 if($view = App::getContext("View")){
                     $this->withAddHeader("Content-Type", "text/html")->withContent($view->fetch());
