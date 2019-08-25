@@ -56,7 +56,12 @@ class HttpController {
      * @param array $data
      */
     public function response($error=1, $message='', $data=[]){
-        response($error, $message, $data);
+        $json = parseResponseData($error, $message, $data);
+        if($this->isAjaxMethod()){
+            $this->response->withJson($json)->send();
+        }else{
+            $this->response->withText($json)->send();
+        }
     }
 
     /**

@@ -4,6 +4,8 @@
  * 2019-08-16 01:14:02
  */
 
+use Small\App;
+
 /**
  * 赋值变量到模板
  * @param $name
@@ -83,12 +85,13 @@ function POST(string $name, string $default = null, string $message = null){
 }
 
 /**
- * 向浏览器端返回数据
+ * 处理为Response需要的数据
  * @param int $error
  * @param string $message
  * @param array $data
+ * @return array
  */
-function response($error=1, $message='', $data=[]){
+function parseResponseData($error = 1, $message = '', $data = []){
     $data = is_array($error) || is_object($error) ? $error : (is_array($message) || is_object($message) ? $message : $data);
     $message = is_string($error) ? $error : (is_array($message) || is_object($message) ? null : $message);
     $error = is_array($error) || is_object($error) ? 0 : (is_string($error) ? 1 : ($error==1 || $error==0 ? $error : $error));
@@ -98,16 +101,31 @@ function response($error=1, $message='', $data=[]){
         "message"   => $message,
         "data"      => is_string($data) ? ['callback_url'=>$data] : $data
     ];
-    if($response = \Small\App::getContext("HttpResponse")){
-        //从全局获取
+    return $json;
+}
+
+/**
+ * 向浏览器端返回数据
+ * @param int $error
+ * @param string $message
+ * @param array $data
+ */
+function response($error=1, $message='', $data=[]){
+    if($httpController = App::getContext("HttpController")){
+        $httpController->response($error, $message, $data);
     }else{
-        //获取不到，新创建一个
-        $response = new \Small\Http\HttpResponse();
-    }
-    if(\Small\Http\Request::isAjaxMethod()){
-        $response->withJson($json)->send();
-    }else{
-        $response->withText($json)->send();
+        $json = parseResponseData($error, $message, $data);
+        if($response = \Small\App::getContext("HttpResponse")){
+            //从全局获取
+        }else{
+            //获取不到，新创建一个
+            $response = new \Small\Http\HttpResponse();
+        }
+        if(\Small\Http\Request::isAjaxMethod()){
+            $response->withJson($json)->send();
+        }else{
+            $response->withText($json)->send();
+        }
     }
 }
 
