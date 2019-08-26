@@ -120,6 +120,14 @@ class Connection {
         }
         $this->configs[$type] = $config ?? $this->configs[$type];
         $config = $this->configs[$type];
+        //如果存在其中一个
+        if(($type == 'read' && isset($this->pdo['write']) && $this->pdo['write'] instanceof PDO) || ($type == 'write' && isset($this->pdo['read']) && $this->pdo['read'] instanceof PDO)){
+            if($config == $this->configs[$type == 'read' ? 'write' : 'read']){
+                //配置相同
+                $this->pdo[$type] = $this->pdo[$type == 'read' ? 'write' : 'read'];
+                return $this->pdo[$type];
+            }
+        }
         //取参数
         $host = Arr::get($config, 'host', '127.0.0.1');
         $port = Arr::get($config, 'port', 3306);
