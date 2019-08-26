@@ -74,8 +74,7 @@ class DB
      * @return PDO
      */
     public static function getPdo($type = 'read'){
-        $con = self::getConnection();
-        return $con->getPdo($type);
+        return self::getConnection()->getPdo($type);
     }
 
     /**
