@@ -942,7 +942,7 @@ class Query
      */
     public function get($total=null, $offset=0){
         $result = $this->grammar->get($total, $offset);
-        if(!$result){
+        if(false === $result){
             list($queryString, $params) = $this->compileToQueryString();
             DB::log("SQL 语法错误：\r\n{$queryString}\r\n参数：{".implode(",",$params)."}\r\n", $this->connection->debug);
         }
