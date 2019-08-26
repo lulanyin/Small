@@ -51,7 +51,7 @@ class DB
     }
 
     /**
-     * 数据库连接对象
+     * 数据库连接对象（静态对象，保证全局只使用一次连接）
      * @var Connection
      */
     private static $connection = null;
@@ -60,7 +60,7 @@ class DB
      * 获取数据库连接对象
      * @return Connection
      */
-    private static function getConnection(){
+    public static function getConnection(){
         if(!is_null(self::$connection)){
             $config = Config::get("private.mysql");
             self::$connection = new Connection($config);
@@ -73,7 +73,7 @@ class DB
      * @param string $type
      * @return PDO
      */
-    private static function getPdo($type = 'read'){
+    public static function getPdo($type = 'read'){
         $con = self::getConnection();
         return $con->getPdo($type);
     }

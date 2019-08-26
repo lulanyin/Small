@@ -228,7 +228,7 @@ class Grammar
         }else{
             $this->params = $params;
         }
-        $write_pdo = $this->query->getConnection()->getPdo('write');
+        $write_pdo = $this->query->getPdo('write');
         try{
             $this->statement = $write_pdo->prepare($queryString);
             //$this->bindValues();

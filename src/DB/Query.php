@@ -1321,8 +1321,7 @@ class Query
      */
     public function getConnection(){
         if(is_null($this->connection)){
-            $configs = Config::get("private.mysql");
-            $this->connection = new Connection($configs);
+            $this->connection = DB::getConnection();
         }
         return $this->connection;
     }
