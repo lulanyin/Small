@@ -83,7 +83,7 @@ class HttpResponse{
             if($annotation){
                 $annotation_controller = Config::get("server.route.annotation_controller");
                 $annotation_controller = !empty($annotation_controller) ? $annotation_controller : HttpController::class;
-                if(!class_exists($annotation_controller) || !($annotation_controller instanceof HttpController)){
+                if(!class_exists($annotation_controller)){
                     $annotation_controller = HttpController::class;
                 }
             }
