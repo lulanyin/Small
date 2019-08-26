@@ -61,7 +61,7 @@ class DB
      * @return Connection
      */
     public static function getConnection(){
-        if(!is_null(self::$connection)){
+        if(is_null(self::$connection)){
             $config = Config::get("private.mysql");
             self::$connection = new Connection($config);
         }
