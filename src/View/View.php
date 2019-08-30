@@ -1,8 +1,10 @@
 <?php
 namespace Small\View;
 
+use Exception;
 use Small\Config;
 use Small\Http\HttpController;
+use Smarty;
 
 /**
  * 视图类，用于输出模板
@@ -34,6 +36,11 @@ class View{
      * @var array|null
      */
     public $path = null;
+
+    /**
+     * @var Smarty
+     */
+    public $smarty = null;
 
     /**
      * View constructor.
@@ -69,44 +76,76 @@ class View{
         $this->path = $path;
         $this->assign('method', $method);
         $this->assign("url_path", join("/", $path));
+        if(is_null($this->smarty)){
+            $setting = Config::get("server.smarty");
+            $setting = is_array($setting) ? $setting : [];
+            $this->smarty = new Smarty();
+            $this->smarty->left_delimiter = $setting['left_delimiter'] ?? "{";
+            $this->smarty->right_delimiter = $setting['right_delimiter'] ?? "}";
+            $this->smarty->setCacheDir(defined("CACHE") ? CACHE."/cache" : __DIR__."/../../runtime/cache/cache");
+            $this->smarty->setCompileDir(defined("CACHE") ? CACHE."/compile" : __DIR__."/../../runtime/cache/compile");
+            //赋值一些数据
+            $configs = Config::get("public");
+            $domain = Config::get("domain");
+            $this->assign('configs', $configs);
+            $this->assign('domain', $domain);
+        }
+        $templatePath = str_replace("_", "", $this->path[0] ?? "");
+        if(!empty($this->path)){
+            $this->smarty->addTemplateDir(Config::get("define.views")."/".$templatePath);
+        }
     }
 
     /**
      * 展示模板
+     * @param string|null $template
      * @return string
      */
-    public function fetch()
+    public function fetch($template = null)
     {
-        if(property_exists($this->controller, 'user')){
+        if(!is_null($this->controller) && property_exists($this->controller, 'user')){
             $this->assign('me', $this->controller->user);
         }
-        $this->template = property_exists($this->controller, 'template') && !empty($this->controller->template) ? $this->controller->template : $this->template;
-        $templatePath = Config::get("define.views")."/".str_replace("_", null, $this->path[0]);
-        //公开配置，可用于模板
-        $configs = Config::get("public");
-        $domain = Config::get("domain");
-        $smarty = new \Smarty();
-        $smarty->left_delimiter = "{";
-        $smarty->right_delimiter = "}";
-        $smarty->setTemplateDir($templatePath);
-        $smarty->setCacheDir(defined("CACHE") ? CACHE."/cache" : __DIR__."/../../runtime/cache/cache");
-        $smarty->setCompileDir(defined("CACHE") ? CACHE."/compile" : __DIR__."/../../runtime/cache/compile");
-        $smarty->assign("configs", $configs);
-        $smarty->assign("domain", $domain);
-        $this->assign('get', $_GET);
-        $this->assign('post', $_POST);
-        foreach ($this->data as $key=>$value){
-            $smarty->assign($key, $value);
+        if(is_null($template)){
+            $this->template = (!is_null($this->controller) && property_exists($this->controller, 'template')) && !empty($this->controller->template) ? $this->controller->template : $this->template;
+            $template = !empty($this->template) ? $this->template : (join("/", array_slice($this->path, 1)));
         }
-        $template = !empty($this->template) ? $this->template : (join("/", array_slice($this->path, 1)));
         $template = strrchr($template, ".html") == ".html"
         || strrchr($template, ".htm") == ".htm"
         || strrchr($template, ".tpl") == ".tpl" ? $template : ($template.".html");
+        $this->assign('get', $_GET);
+        $this->assign('post', $_POST);
+        $this->assign('globals', $GLOBALS);
+        foreach ($this->data as $key=>$value){
+            $this->smarty->assign($key, $value);
+        }
         try{
-            return $smarty->fetch($template);
-        }catch (\Exception $e){
+            return $this->smarty->fetch($template);
+        }catch (Exception $e){
             return $e->getMessage();
         }
+    }
+
+    /**
+     * 添加模板目录
+     * @param $dir
+     */
+    public function addTemplateDir($dir){
+        if(is_dir($dir)){
+            try{
+                $this->smarty->addTemplateDir($dir);
+            }catch (Exception $e){
+                //无法添加
+                //echo $e->getMessage();
+            }
+        }
+    }
+
+    public function templateExists($template){
+        $template = strrchr($template, ".html") == ".html"
+        || strrchr($template, ".htm") == ".htm"
+        || strrchr($template, ".tpl") == ".tpl" ? $template : ($template.".html");
+        return $this->smarty->templateExists($template);
     }
 
 }
