@@ -57,7 +57,7 @@ class HttpController {
      */
     public function response($error=1, $message='', $data=[]){
         $json = parseResponseData($error, $message, $data);
-        if($this->isAjaxMethod()){
+        if($this->isAjaxMethod() || stripos($message, "json:") === 0){
             $this->response->withJson($json)->send();
         }else{
             $this->response->withText($json)->send();
