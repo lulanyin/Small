@@ -121,7 +121,7 @@ function response($error=1, $message='', $data=[]){
             //获取不到，新创建一个
             $response = new \Small\Http\HttpResponse();
         }
-        if(\Small\Http\Request::isAjaxMethod()){
+        if(\Small\Http\Request::isAjaxMethod() || App::getContext("ResponseType") == 'json'){
             $response->withJson($json)->send();
         }else{
             $response->withText($json)->send();
