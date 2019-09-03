@@ -57,11 +57,6 @@ class HttpRouter implements IServer {
         //全局响应类
         $response = new HttpResponse();
         App::setContext("HttpResponse", $response);
-        //谷歌浏览器发起的，多一次请求
-        if($this->uri == '/favicon.ico'){
-            //直接 header status 200
-            $response->withStatus(200)->send();
-        }
         //OPTIONS请求
         if($_SERVER['REQUEST_METHOD'] == "OPTIONS"){
             $response->processOptions()->exit();
@@ -80,6 +75,11 @@ class HttpRouter implements IServer {
         }
         if(strrchr($path, "/")=="/"){
             $path = substr($path, 0, -1);
+        }
+        //谷歌浏览器发起的，多一次请求
+        if($path == 'favicon.ico'){
+            //直接 header status 200
+            $response->withStatus(200)->send();
         }
         //如果包住有.html
         //判断.html的位置
