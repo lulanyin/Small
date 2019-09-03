@@ -118,6 +118,10 @@ class HttpRouter implements IServer {
                 $pathArray = array_pad($pathArray, 3, "index");
             }
         }
+        //如果设置了
+        if(isset($httpRoute['response_type']) && isset($httpRoute['response_type'][$pathArray[0]])){
+            App::setContext('ResponseType', $httpRoute['response_type'][$pathArray[0]]);
+        }
         //处理类的执行
         $prefix = $this->home ?? Config::get("server.route.http.home");
         //控制器是否打开了使用注解类实现，未配置的控制器必须继承HttpController，配置了注解的，将使用注入方式

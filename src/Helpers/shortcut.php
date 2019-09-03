@@ -39,7 +39,7 @@ function parseHttpData($value, $message = null){
             //新建
             $response = new \Small\Http\HttpResponse();
         }
-        if(\Small\Http\Request::isAjaxMethod() || stripos($message, "json:") === 0){
+        if(\Small\Http\Request::isAjaxMethod() || stripos($message, "json:") === 0  || App::getContext("ResponseType") == 'json'){
             $response->withJson([
                 "error"     => 1,
                 "message"   => stripos($message, "json:") === 0 ? substr($message, 5) : $message
