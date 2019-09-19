@@ -75,7 +75,9 @@ class View{
         $this->controller = $controller;
         $this->path = $path;
         $this->assign('method', $method);
-        $this->assign("url_path", join("/", $path));
+        $self_url_path = join("/", $path).(!empty($method) && $method!='index' ? "/{$method}" : '');
+        $this->assign("url_path", $self_url_path);
+        $this->assign("self_url", $self_url_path);
         if(is_null($this->smarty)){
             $setting = Config::get("server.smarty");
             $setting = is_array($setting) ? $setting : [];
@@ -92,7 +94,11 @@ class View{
         }
         $templatePath = str_replace("_", "", $this->path[0] ?? "");
         if(!empty($this->path)){
-            $this->smarty->addTemplateDir(Config::get("define.views")."/".$templatePath);
+            try{
+                $this->smarty->addTemplateDir(Config::get("define.views")."/".$templatePath);
+            }catch (Exception $exception){
+                //..
+            }
         }
     }
 
