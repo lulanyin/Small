@@ -855,6 +855,33 @@ class Query
     }
 
     /**
+     * 判断以 逗号 , 分隔的字符与字段值是否 有交集
+     * @param string $column
+     * @param string|array $value
+     * @param bool $not
+     * @return Query
+     */
+    public function whereIsIntersection(string $column, $value, $not = false) : Query
+    {
+        $value = is_array($value) ? join(",", $value) : $value;
+        if(!empty($value) && !empty($column)){
+            return $this->whereRaw("(select concat('{$value}', ',') regexp concat(replace({$column}, ',', ',|'), ',')) = ".($not ? "0" : "1"));
+        }
+        return $this;
+    }
+
+    /**
+     * 判断以 逗号 , 分隔的字符与字段值是否 无交集
+     * @param string $column
+     * @param string|array $value
+     * @return Query
+     */
+    public function whereNotIntersection(string $column, $value) : Query
+    {
+        return $this->whereIsIntersection($column, $value, true);
+    }
+
+    /**
      * union
      * @param Query $query
      * @param bool $all
