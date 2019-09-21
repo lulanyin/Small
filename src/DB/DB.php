@@ -69,6 +69,36 @@ class DB
     }
 
     /**
+     * 开始事务
+     */
+    public static function begin(){
+        $con = self::getConnection();
+        if(!$con->inTransaction){
+            $con->begin();
+        }
+    }
+
+    /**
+     * 事务回滚
+     */
+    public static function rollback(){
+        $con = self::getConnection();
+        if($con->inTransaction){
+            $con->rollback();
+        }
+    }
+
+    /**
+     * 事务提交
+     */
+    public static function commit(){
+        $con = self::getConnection();
+        if($con->inTransaction){
+            $con->commit();
+        }
+    }
+
+    /**
      *
      * @param string $type
      * @return PDO
