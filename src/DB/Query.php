@@ -1049,7 +1049,7 @@ class Query
      * @param null $columns
      * @return bool | Query
      */
-    public function update($columns=null) : ?Query
+    public function update($columns=null)
     {
         if(is_array($columns)){
             $this->set($columns);
