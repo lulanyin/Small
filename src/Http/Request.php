@@ -32,7 +32,7 @@ class Request{
         $value = Arr::get($var, $name, $default);
         $value = empty($value) && !is_numeric($value) ? $default : $value;
         $var[$name] = $fn ? Str::filter($fn, $value) : $value;
-        return $value;
+        return $var[$name];
     }
 
     /**
