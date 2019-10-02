@@ -95,7 +95,7 @@ class HttpRouter implements IServer {
             $pathArray = !empty($path) ? explode("/", $path) : [
                 "index", "index"
             ];
-            $pathLen = count($pathArray);
+            $pathLen = count($pathArray) + 1;
             //至少为2长度 [class, ...method]
             if(count($pathArray)<2){
                 $pathArray = array_pad($pathArray, 2, "index");
