@@ -134,8 +134,8 @@ class HttpRouter implements IServer {
             if(!class_exists($className)){
                 $className = $prefix.join("\\", $pathArray)."\index".($annotation ? "" : "Controller");
                 if(!class_exists($className)){
-                    $method = $pathLen<2 ? $pathArray[count($pathArray)-2] : end($pathArray);
-                    $pathArray = array_merge(array_slice($pathArray, 0, $pathLen<2 ? -2 : -1), ["index"]);
+                    $method = $pathLen<=2 ? $pathArray[count($pathArray)-2] : end($pathArray);
+                    $pathArray = array_merge(array_slice($pathArray, 0, $pathLen<=2 ? -2 : -1), ["index"]);
                     $className = $prefix.join("\\", $pathArray).($annotation ? "" : "Controller");
                     if(!class_exists($className)) {
                         $this->whitStatus(404, "class {$className} not exists!");
