@@ -142,7 +142,7 @@ class Query
      * 新建一个 Query 对象
      * @return Query
      */
-    public function newQuery() : Query
+    public function newQuery()
     {
         return new Query($this->connection);
     }
