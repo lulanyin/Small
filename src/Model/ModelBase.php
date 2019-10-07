@@ -3,7 +3,6 @@ namespace Small\Model;
 
 use Small\App;
 use Small\Config;
-use Small\DB\Query;
 
 /**
  * 数据库模型基类
@@ -14,7 +13,7 @@ abstract class ModelBase {
 
     /**
      * Query对象
-     * @var Query
+     * @var \Small\DB\Query|\Small\Swoole\Mysql\Query
      */
     protected $db = null;
 
@@ -176,7 +175,7 @@ abstract class ModelBase {
      * 动态重载方法
      * @param $method
      * @param $arguments
-     * @return Query
+     * @return \Small\DB\Query|\Small\Swoole\Mysql\Query
      */
     public function __call($method, $arguments)
     {
@@ -235,19 +234,19 @@ abstract class ModelBase {
 
     /**
      * 获取一个新的连接
-     * @return bool|Query
+     * @return bool|\Small\DB\Query|\Small\Swoole\Mysql\Query
      */
     private function getNewDB(){
         if(!is_null($this->db)){
             return $this->db->newQuery();
         }
-        return new Query();
+        return $this->pool ? (new \Small\Swoole\Mysql\Query()) : (new \Small\DB\Query());
     }
 
     /**
      * 主表的Query对象
      * @param bool $as
-     * @return Query|null
+     * @return \Small\DB\Query|\Small\Swoole\Mysql\Query|null
      */
     public function mainQuery($as=false){
         $db = $this->getNewDB();
@@ -262,7 +261,7 @@ abstract class ModelBase {
 
     /**
      * 返回一个空的Query
-     * @return bool|Query
+     * @return bool|\Small\DB\Query|\Small\Swoole\Mysql\Query
      */
     public function emptyQuery(){
         return $this->getNewDB();
