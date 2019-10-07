@@ -69,33 +69,26 @@ class DB
     }
 
     /**
-     * 开始事务
+     * 事务开始
      */
-    public static function begin(){
-        $con = self::getConnection();
-        if(!$con->inTransaction){
-            $con->begin();
-        }
+    public static function begin()
+    {
+        self::getConnection()->begin();
     }
 
     /**
      * 事务回滚
      */
-    public static function rollback(){
-        $con = self::getConnection();
-        if($con->inTransaction){
-            $con->rollback();
-        }
+    public static function rollback()
+    {
+        self::getConnection()->rollback();
     }
 
     /**
-     * 事务提交
+     * 提交事务
      */
     public static function commit(){
-        $con = self::getConnection();
-        if($con->inTransaction){
-            $con->commit();
-        }
+        self::getConnection()->commit();
     }
 
     /**

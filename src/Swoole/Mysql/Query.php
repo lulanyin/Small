@@ -17,7 +17,7 @@ class Query extends \Small\DB\Query{
     public function __construct(Connection $connection = null)
     {
         //parent::__construct($connection);
-        $this->connection = $connection ?? DB::getConnection();
+        $this->connection = $connection;
         $this->grammar = new Grammar($this);
     }
 
