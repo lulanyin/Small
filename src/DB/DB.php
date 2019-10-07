@@ -3,7 +3,10 @@ namespace Small\DB;
 
 use PDO;
 use PDOException;
+use Small\App;
 use Small\Config;
+use Small\Swoole\Mysql\Pool;
+use Swoole\Coroutine;
 
 /**
  *
@@ -17,11 +20,11 @@ class DB
      * DB::from('user') ...
      * @param $table
      * @param null $as
-     * @return Query
+     * @return Query|\Small\Swoole\Mysql\Query
      */
     public static function from($table, $as = null)
     {
-        $query = new Query();
+        $query = App::$server ? new \Small\Swoole\Mysql\Query() : new Query();
         return $query->from($table, $as);
     }
 
@@ -44,7 +47,7 @@ class DB
                 @fclose($f);
             }
         }
-        if($output){
+        if($output || App::$server){
             $text = str_replace("\r\n", "<br>", $text);
             echo $text.PHP_EOL;
         }
@@ -57,15 +60,34 @@ class DB
     private static $connection = null;
 
     /**
+     * 连接池
+     * @var \Small\Swoole\Mysql\Connection[]
+     */
+    private static $connections = [];
+
+    /**
      * 获取数据库连接对象
      * @return Connection
      */
     public static function getConnection(){
-        if(is_null(self::$connection)){
-            $config = Config::get("private.mysql");
-            self::$connection = new Connection($config);
+        if(App::$server){
+            $cid = Coroutine::getCid();
+            if(isset(self::$connections[$cid]) && self::$connections[$cid] instanceof \Small\Swoole\Mysql\Connection){
+                return self::$connections[$cid];
+            }
+            self::$connections[$cid] = Pool::getPool();
+            //协程退出时会执行
+            Coroutine::defer(function () use ($cid){
+                unset(self::$connections[$cid]);
+            });
+            return self::$connections[$cid];
+        }else{
+            if(is_null(self::$connection)){
+                $config = Config::get("private.mysql");
+                self::$connection = new Connection($config);
+            }
+            return self::$connection;
         }
-        return self::$connection;
     }
 
     /**
@@ -110,17 +132,26 @@ class DB
         $con = self::getConnection();
         $sql = trim($sql);
         $pdo = $con->getPdo(stripos($sql, "SELECT") === 0 ? "read" : "write");
-        try{
-            $stm = $pdo->prepare($sql);
-            if($stm->execute($params)){
-                return $stm->rowCount();
+        if(App::$server){
+            $stmt = $pdo->prepare($sql);
+            if($stmt !== false){
+                return $stmt->execute($params);
             }else{
-                $code = intval($stm->errorCode());
-                throw new PDOException($stm->errorInfo()[2]."<br>query : ".$stm->queryString."<br>code source : ".$code, intval($code));
+                return false;
             }
-        }catch (PDOException $exception){
-            $con->setError($exception->getCode(), $exception->errorInfo);
-            return false;
+        }else{
+            try{
+                $stm = $pdo->prepare($sql);
+                if($stm->execute($params)){
+                    return $stm->rowCount();
+                }else{
+                    $code = intval($stm->errorCode());
+                    throw new PDOException($stm->errorInfo()[2]."<br>query : ".$stm->queryString."<br>code source : ".$code, intval($code));
+                }
+            }catch (PDOException $exception){
+                $con->setError($exception->getCode(), $exception->errorInfo);
+                return false;
+            }
         }
     }
 }
