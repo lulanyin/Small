@@ -12,6 +12,12 @@ use Small\Config;
 abstract class ModelBase {
 
     /**
+     * 主键
+     * @var string
+     */
+    protected $primary_key = "id";
+
+    /**
      * Query对象
      * @var \Small\DB\Query|\Small\Swoole\Mysql\Query
      */
@@ -265,5 +271,34 @@ abstract class ModelBase {
      */
     public function emptyQuery(){
         return $this->getNewDB();
+    }
+
+    /**
+     * 获取一行数据
+     * @param null $primary_key
+     * @return array
+     */
+    public static function getRow($primary_key = null){
+        $m = new static();
+        $db = $m->mainQuery();
+        if(!is_null($primary_key)){
+            $db->where($m->primary_key, $primary_key);
+        }
+        return $db->first();
+    }
+
+    /**
+     * 删除一行数据
+     * @param $primary_key
+     * @return bool
+     */
+    public static function delRow($primary_key){
+        $m = new static();
+        $db = $m->mainQuery()->where($m->primary_key, $primary_key);
+        if($db->delete()){
+            return $db->getAffectRows();
+        }else{
+            return false;
+        }
     }
 }

@@ -195,6 +195,7 @@ class HttpRouter implements IServer {
         if($debug){
             //输出消息
             exit(json_encode([
+                    "error"     => 1,
                     "status"    => $code,
                     "message"   => $message
                 ]).PHP_EOL);

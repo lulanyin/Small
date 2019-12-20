@@ -25,7 +25,7 @@ function assign($name, $value = null){
  * 处理HTTP的GET, POST数据
  * @param $value
  * @param null $message
- * @return null
+ * @return mixed
  */
 function parseHttpData($value, $message = null){
     $need = !is_null($message);
@@ -54,9 +54,9 @@ function parseHttpData($value, $message = null){
 /**
  * 获取地址参数
  * @param string $name
- * @param string|null $default
+ * @param $default
  * @param string|null $message
- * @return null
+ * @return mixed
  */
 function getUrlQuery(string $name, string $default = null, string $message = null){
     $value = \Small\Http\Request::get($name, $default);
@@ -72,9 +72,9 @@ function GET(string $name, string $default = null, string $message = null){
 /**
  * 获取POST数据
  * @param string $name
- * @param string|null $default
+ * @param $default
  * @param string|null $message
- * @return null
+ * @return mixed
  */
 function getPostData(string $name, string $default = null, string $message = null){
     $value = \Small\Http\Request::post($name, $default);
@@ -86,9 +86,9 @@ function POST(string $name, string $default = null, string $message = null){
 
 /**
  * 处理为Response需要的数据
- * @param int $error
- * @param string $message
- * @param array $data
+ * @param $error
+ * @param $message
+ * @param $data
  * @return array
  */
 function parseResponseData($error = 1, $message = '', $data = []){
@@ -106,11 +106,11 @@ function parseResponseData($error = 1, $message = '', $data = []){
 
 /**
  * 向浏览器端返回数据
- * @param int $error
- * @param string $message
- * @param array $data
+ * @param $error
+ * @param $message
+ * @param $data
  */
-function response($error=1, $message='', $data=[]){
+function response($error = 1, $message = '', $data = []){
     if($httpController = App::getContext("HttpController")){
         $httpController->response($error, $message, $data);
     }else{
