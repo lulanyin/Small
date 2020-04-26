@@ -1403,12 +1403,11 @@ class Query
         }
         $columns = $this->columns;
         $columnsString = join(",", $columns);
-        $bool = strripos($columnsString, " sum(")
-            || strripos($columnsString, " avg(")
-            || strripos($columnsString, " count(")
-            || strripos($columnsString, " max(")
-            || strripos($columnsString, " min(");
-        return $bool;
+        return strripos($columnsString, "sum(")
+            || strripos($columnsString, "avg(")
+            || strripos($columnsString, "count(")
+            || strripos($columnsString, "max(")
+            || strripos($columnsString, "min(");
     }
 
     /**

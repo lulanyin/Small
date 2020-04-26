@@ -102,13 +102,12 @@ class Grammar
      */
     public function count()
     {
-        $columns = $this->query->columns;
+        $columns = $this->query->columns || !empty($this->query->groupBy);
         $bool = $this->query->checkAggregateQuery();
-        $this->query->columns = !$bool ? ["count('')"] : $columns;
+        $this->query->columns = !$bool ? ["count(*)"] : $columns;
         list($queryString, $params) = $this->compileToQueryString();
         //如果原语句中，包含了 sum(), avg(), max()... group by，要统计行数，是不能直接使用  count(*)的
         //但是可以修改一下查询语句为  select count(*) from (原语句) temp_table
-        $bool = $bool ? $bool : !empty($this->query->groupBy);
         if($bool){
             $queryString = "SELECT COUNT(*) FROM ({$queryString}) TEMP_TABLE";
         }
