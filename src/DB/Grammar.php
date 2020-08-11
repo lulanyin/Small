@@ -102,8 +102,8 @@ class Grammar
      */
     public function count()
     {
-        $columns = $this->query->columns || !empty($this->query->groupBy);
-        $bool = $this->query->checkAggregateQuery();
+        $columns = $this->query->columns;
+        $bool = $this->query->checkAggregateQuery() || !empty($this->query->groupBy);
         $this->query->columns = !$bool ? ["count(*)"] : $columns;
         list($queryString, $params) = $this->compileToQueryString();
         //如果原语句中，包含了 sum(), avg(), max()... group by，要统计行数，是不能直接使用  count(*)的
