@@ -132,10 +132,11 @@ function response($error = 1, $message = '', $data = []){
 /**
  * 重定向
  * @param string $url
+ * @param int $status
  */
-function redirect(string $url){
+function redirect(string $url, $status = 301){
     if($response = \Small\App::getContext("HttpResponse")){
-        $response->redirect($url);
+        $response->redirect($url, $status);
     }
 }
 

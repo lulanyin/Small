@@ -357,9 +357,10 @@ class HttpResponse{
     /**
      * 重定向
      * @param string $route
+     * @param int $status
      */
-    public function redirect(string $route){
-        $this->withStatus(301);
+    public function redirect(string $route, $status = 301){
+        $this->withStatus($status);
         if(stripos($route, "/")===0 || stripos($route, ":")===0){
             $route = url($route);
         }elseif(stripos($route, "http")!==0){
